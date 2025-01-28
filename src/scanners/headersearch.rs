@@ -55,8 +55,8 @@ pub fn is_polyglot(file: &str) -> bool {
         eprintln!("Error: File does not exist.");
         return false;
     }
-
-    let mut buffer = [0; 10024]; 
+    let filesize = 100000000;
+    let mut buffer = vec![0; filesize]; 
     let file = File::open(file).expect("Unable to open file");
     let mut reader = BufReader::new(file);
 
