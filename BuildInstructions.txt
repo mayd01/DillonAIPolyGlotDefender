@@ -1,0 +1,98 @@
+Building and Packaging dilly_defender as an RPM
+Install Required Tools
+Run the following commands to install the required tools:
+
+bash
+Copy
+Edit
+sudo apt update
+sudo apt install -y rpm build-essential cargo
+Set Up the rpmbuild Directory Structure
+Create the required directory structure for building RPMs:
+
+bash
+Copy
+Edit
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+Build Your Rust Project
+Compile the Rust project in release mode:
+
+bash
+Copy
+Edit
+cargo build --release
+Verify that the binary was built successfully:
+
+bash
+Copy
+Edit
+ls target/release/dilly_defender
+Prepare the Tarball
+Package your binary into a tarball for the RPM build:
+
+bash
+Copy
+Edit
+mkdir dilly_defender-1.0
+cp target/release/dilly_defender dilly_defender-1.0/
+tar czvf dilly_defender.tar.gz dilly_defender-1.0
+mv dilly_defender.tar.gz ~/rpmbuild/SOURCES/
+Create the RPM Spec File
+Write a spec file for your application:
+
+bash
+Copy
+Edit
+nano ~/rpmbuild/SPECS/dilly_defender.spec
+Paste the following content into the file:
+
+spec
+Copy
+Edit
+Name:           dilly_defender
+Version:        1.0
+Release:        1%{?dist}
+Summary:        A Rust-based application
+
+License:        MIT
+URL:            https://example.com/dilly_defender
+Source0:        %{name}.tar.gz
+
+%description
+dilly_defender is a Rust-based application.
+
+%prep
+%setup -q
+
+%build
+# No build step needed as the binary is already built with Rust
+
+%install
+mkdir -p %{buildroot}/usr/local/bin
+install -m 755 dilly_defender %{buildroot}/usr/local/bin/dilly_defender
+
+%files
+/usr/local/bin/dilly_defender
+
+%changelog
+Build the RPM
+Run the following command to build the RPM:
+
+bash
+Copy
+Edit
+rpmbuild -ba ~/rpmbuild/SPECS/dilly_defender.spec
+Find the RPM File
+Once the build is complete, the RPM file will be located in the following directory:
+
+bash
+Copy
+Edit
+~/rpmbuild/RPMS/x86_64/
+Install the RPM
+To install the RPM, run:
+
+bash
+Copy
+Edit
+sudo rpm -i ~/rpmbuild/RPMS/x86_64/dilly_defender-1.0-1.x86_64.rpm
