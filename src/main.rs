@@ -3,8 +3,44 @@ use colored::*;
 use std::fs;
 use std::path::Path;
 mod scanners;
+mod scrubber;
+use fern::Dispatch;
+use chrono::Local;
+use std::fs::OpenOptions;
 
-fn main() {
+
+fn setup_logger(log_file: &str) -> Result<(), fern::InitError> {
+    let log_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_file)?;
+
+    Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "[{}] [{}] {}",
+                Local::now().format("%Y-%m-%d %H:%M:%S"),
+                record.level(),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Debug) 
+        .chain(log_file) 
+        .apply()?;
+
+    Ok(())
+}
+
+fn main() 
+{
+
+    let log_file = "app.log";
+
+    if let Err(e) = setup_logger(log_file) {
+        eprintln!("Failed to initialize logger: {}", e);
+        return;
+    }
+
     let matches = Command::new("Dilly Defender")
         .version("1.0")
         .author("Your Name")
@@ -72,7 +108,11 @@ fn main() {
             println!("{}", format!("Scanning file: {}", file).green());
             if verbose {
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
+                
+                scanners::headersearch::analyze_file(file);
+
             }
+            scrubber::fileTypeScrubber::view_pdf_metadata(file).unwrap();
 
             if scanners::headersearch::is_polyglot(file) {
                 println!("{}", "Potential polyglot file detected!".red());
@@ -80,13 +120,6 @@ fn main() {
                 println!("{}", "Scan complete. No threats detected.".blue());
             }
 
-            match scanners::entropy::calculate_entropy(file)
-            {
-                Ok(entropy) => println!("The entropy of the file is: {}", entropy),
-                Err(e) => eprintln!("Error reading the file: {}", e),
-            }
-
-            scanners::headersearch::analyze_file(file);
         }
 
         Some(("scan-dir", sub_m)) => {
@@ -109,12 +142,6 @@ fn main() {
                     } else {
                         println!("{}", "Scan complete. No threats detected.".blue());
                     }
-                        match scanners::entropy::calculate_entropy(entry)
-                        {
-                            Ok(entropy) => println!("The entropy of the file is: {}", entropy),
-                            Err(e) => eprintln!("Error reading the file: {}", e),
-                        }
-                        scanners::headersearch::analyze_file(entry);
                     }
                     
         
@@ -139,7 +166,6 @@ fn main() {
             println!("{}", format!("Using AI model: {}", model).green());
             println!("{}", format!("AI scanning initiated for: {}", file).blue());
 
-            // Placeholder for AI-based scanning
             println!("{}", "AI scan complete. Potential threats found: 0.".green());
         }
 
