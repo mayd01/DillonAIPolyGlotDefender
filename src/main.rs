@@ -112,7 +112,11 @@ fn main()
                 scanners::headersearch::analyze_file(file);
 
             }
-            scrubber::fileTypeScrubber::view_pdf_metadata(file).unwrap();
+            
+            match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&file) {
+                    Ok(_) => println!("PDF sanitized successfully."),
+                    Err(err) => println!("Sanitization failed: {}", err),
+                }
 
             if scanners::headersearch::is_polyglot(file) {
                 println!("{}", "Potential polyglot file detected!".red());

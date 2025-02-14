@@ -1,93 +1,74 @@
 use lopdf::{Document, Object};
-use std::fs;
-use std::error::Error;
+use std::fs::{self, File};
+use std::error::Error as StdError;
+use std::io::Read;
 use log::{debug, error, info, warn};
+use std::fmt::Write;
 
-fn sanitize_pdf(input_path: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
-    let mut doc = Document::load(input_path)?;
+pub fn sanitize_pdf(file_path: &str) -> Result<(), String> {
+    if !file_path.to_lowercase().ends_with(".pdf") {
+        return Err("Invalid file type: Not a PDF.".to_string());
+    }
 
-    info!("Sanitizing PDF: {}", input_path);
     
-    // Remove the "Info" entry from the trailer if it exists
-    if let Some(trailer) = doc.trailer.as_dict_mut() {
-        trailer.remove(b"Info");
+    let mut file = match File::open(file_path) {
+        Ok(f) => f,
+        Err(_) => return Err("Failed to open file.".to_string()),
+    };
+    
+    let mut buffer = [0; 5]; 
+    if let Err(_) = file.read_exact(&mut buffer) {
+        return Err("Failed to read file header.".to_string());
     }
 
-    // Remove annotations from the pages
-    for (_, page) in doc.get_pages() {
-        if let Ok(contents) = doc.get_object_mut(page) {
-            if let Object::Dictionary(ref mut dict) = contents {
-                dict.remove(b"Annots");
-            }
+    if buffer != *b"%PDF-" {
+        return Err("Invalid file format: Missing PDF signature.".to_string());
+    }
+
+    match Document::load(file_path) {
+        Ok(mut doc) => {
+            sanitize_pdf_structure(&mut doc)?;
+            doc.save(file_path).map_err(|_| "Failed to save sanitized PDF.".to_string())?;
+            Ok(())
         }
+        Err(_) => Err("Invalid PDF structure.".to_string()),
     }
-
-    // Save the sanitized PDF
-    doc.save(output_path)?;
-    println!("Sanitized PDF saved as {}", output_path);
-
-    Ok(())
 }
 
-fn sanitize_pdf_for_polyglot(pdf_path: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
-    let mut doc = Document::load(pdf_path)?;
+fn sanitize_pdf_structure(doc: &mut Document) -> Result<(), String> {
+    println!("Started sanitization...");
 
-    // Remove metadata info from trailer
-    if let Some(trailer) = doc.trailer.as_dict_mut() {
-        trailer.remove(b"Info");
-    }
-
-    // Iterate over all objects to remove JavaScript if it exists
     for (_, obj) in doc.objects.iter_mut() {
-        if let Object::Dictionary(ref mut dict) = obj {
-            if dict.contains_key(b"JavaScript") {
-                dict.remove(b"JavaScript");
+        match obj {
+            Object::Dictionary(dict) => {
+                let mut removed_keys = Vec::new();
+
+                let keys_to_remove: [&[u8]; 10] = [
+                    b"JavaScript", b"JS", b"EmbeddedFiles", b"AA", b"OpenAction",
+                    b"Launch", b"URI", b"GoTo", b"Metadata", b"CustomMetadata"
+                ];
+
+                for key in keys_to_remove {
+                    if dict.get(key).is_ok() {
+                        removed_keys.push(String::from_utf8_lossy(key).to_string());
+                        dict.remove(key);
+                    }
+                }
+
+                if !removed_keys.is_empty() {
+                    let mut log_message = String::new();
+                    write!(&mut log_message, "Removed keys: ").map_err(|_| "Log write error")?;
+
+                    for key in &removed_keys {
+                        write!(&mut log_message, "{} ", key).map_err(|_| "Log write error")?;
+                    }
+
+                    println!("{}", log_message);
+                }
             }
+            _ => {}
         }
     }
-
-    // Remove annotations from the pages
-    for (_, page) in doc.get_pages() {
-        if let Ok(contents) = doc.get_object_mut(page) {
-            if let Object::Dictionary(ref mut dict) = contents {
-                dict.remove(b"Annots");
-            }
-        }
-    }
-
-    // Clear embedded files
-    if let Some(files) = doc.trailer.get_mut(b"EmbeddedFiles") {
-        if let Ok(dict) = files.as_dict_mut() {
-            dict.clear();
-        }
-    }
-
-    // Save the sanitized PDF
-    doc.save(output_path)?;
-    println!("Sanitized PDF saved to {}", output_path);
-
-    Ok(())
-}
-
-fn view_pdf_metadata(pdf_path: &str) -> Result<(), Box<dyn Error>> {
-    let doc = Document::load(pdf_path)?;
-
-    if let Some(info_obj) = doc.trailer.get(b"Info") {
-        if let Ok(info_dict) = info_obj.as_dict() {
-            println!("PDF Metadata:");
-            for (key, value) in info_dict.iter() {
-                println!(
-                    "{}: {}",
-                    String::from_utf8_lossy(key),
-                    value.to_string()
-                );
-            }
-        } else {
-            println!("The 'Info' entry is not a dictionary.");
-        }
-    } else {
-        println!("No metadata found.");
-    }
-
+    println!("Sanitization complete.");
     Ok(())
 }
