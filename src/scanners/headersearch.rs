@@ -1,6 +1,9 @@
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::Path;
+use crate::scanners::deepscanner::entropy;
+use log::{debug, error, info, warn};
+use chrono::{DateTime, Local};
 
 const MAGIC_BYTES: &[(&[u8], &str)] = &[
     (b"%PDF", "PDF"),                // PDF
@@ -50,11 +53,15 @@ const MAGIC_BYTES: &[(&[u8], &str)] = &[
 ];
 
 pub fn is_polyglot(file: &str) -> bool {
+
     let path = Path::new(file);
     if !path.exists() {
         eprintln!("Error: File does not exist.");
         return false;
     }
+
+    info!("Checking for polyglot file: {}", path.to_string_lossy());
+    
     let filesize = 100000000;
     let mut buffer = vec![0; filesize]; 
     let file = File::open(file).expect("Unable to open file");
@@ -69,7 +76,6 @@ pub fn is_polyglot(file: &str) -> bool {
                 detected_signatures.push(*file_type);
             }
         }
-        // print!()
         if detected_signatures.len() > 1 {
             println!(
                 "Potential polyglot file detected! Contains signatures for: {:?}",
@@ -82,7 +88,6 @@ pub fn is_polyglot(file: &str) -> bool {
     false
 }
 
-/// Prints detailed file analysis, showing detected headers and offsets.
 pub fn analyze_file(file: &str) {
     let path = Path::new(file);
     if !path.exists() {
@@ -90,7 +95,7 @@ pub fn analyze_file(file: &str) {
         return;
     }
 
-    let mut buffer = [0; 4096]; // Read the first 4KB for deeper analysis
+    let mut buffer = [0; 4096]; 
     let file = File::open(file).expect("Unable to open file");
     let mut reader = BufReader::new(file);
 
@@ -103,5 +108,28 @@ pub fn analyze_file(file: &str) {
                 println!("{} signature found at offset: {}", file_type, pos);
             }
         }
+    }
+    
+    let metadata = match path.metadata() {
+        Ok(metadata) => metadata,
+        Err(err) => {
+            eprintln!("Error retrieving metadata for file '{}': {}", path.file_name().unwrap().to_string_lossy(), err);
+            return;
+        }
+    };
+
+    println!("File size: {} bytes", metadata.len());
+
+    if let Ok(modified_time) = metadata.modified() {
+        let datetime: DateTime<Local> = DateTime::from(modified_time);
+        println!("Last modified: {}", datetime.format("%Y-%m-%d %H:%M:%S"));
+    } else {
+        eprintln!("Error retrieving the modified time for file '{}'.", path.file_name().unwrap().to_string_lossy());
+    }
+
+    match entropy::calculate_entropy(path.to_str().unwrap())
+    {
+        Ok(entropy) => println!("The entropy of the file is: {}", entropy),
+        Err(e) => eprintln!("Error reading the file: {}", e),
     }
 }
