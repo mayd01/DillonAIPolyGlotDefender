@@ -43,7 +43,7 @@ fn main()
 
     let matches = Command::new("Dilly Defender")
         .version("1.0")
-        .author("Your Name")
+        .author("Dillon May")
         .about("A CLI tool to detect polyglot files and threats")
         .subcommand(
             Command::new("scan")
