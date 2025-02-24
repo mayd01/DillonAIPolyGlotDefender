@@ -64,7 +64,15 @@ fn main()
                 .arg(
                     Arg::new("directory")
                         .required(true)
+
                         .help("The directory to scan"),
+                )
+                .arg(Arg::new("verbose")
+                    .short('v')
+                    .long("verbose")
+                    .action(clap::ArgAction::SetTrue) 
+                    .default_value("false") 
+                    .help("Enable verbose output")
                 )
                 .arg(
                     Arg::new("recursive")
@@ -110,7 +118,6 @@ fn main()
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
                 
                 scanners::headersearch::analyze_file(file);
-
             }
             
             match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&file) {
@@ -129,6 +136,7 @@ fn main()
         Some(("scan-dir", sub_m)) => {
             let dir = sub_m.get_one::<String>("directory").unwrap();
             let _recursive = sub_m.get_flag("recursive");
+            let verbose = sub_m.get_flag("verbose");
 
             if !Path::new(dir).is_dir() {
                 println!("{}", "Error: Directory not found.".red());
@@ -152,8 +160,12 @@ fn main()
                    
                 }
             }
-
-            println!("{}", "Directory scan completed.".green());
+            if verbose {
+                println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
+                scanners::headersearch::analyze_file(dir);
+            }
+            
+            println!("{}", format!("Directory scan complete. Potential threats found: {}", _count).green());
         }
 
         Some(("ai-scan", sub_m)) => {
