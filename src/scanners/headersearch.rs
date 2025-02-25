@@ -78,7 +78,7 @@ pub fn is_polyglot(file: &str) -> bool {
         }
         if detected_signatures.len() > 1 {
             println!(
-                "Potential polyglot file detected! Contains signatures for: {:?}",
+                "Potential polyglot file detected! {} Contains signatures for: {:?}", path.to_string_lossy(),
                 detected_signatures
             );
             return true;
@@ -129,7 +129,7 @@ pub fn analyze_file(file: &str) {
 
     match entropy::calculate_entropy(path.to_str().unwrap())
     {
-        Ok(entropy) => println!("The entropy of the file is: {}", entropy),
+        Ok(entropy) => println!("The entropy of the file is: {:?}", entropy),
         Err(e) => eprintln!("Error reading the file: {}", e),
     }
 }
