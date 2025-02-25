@@ -212,7 +212,31 @@ fn main()
 
         Some(("info", _)) => {
             println!("{}", "Dilly Defender - Polyglot File Detection CLI".cyan());
-            println!("{}", "Supported file types: .exe, .pdf, .zip, .jpg, etc.".magenta());
+            println!("{}", "Supported file types:".magenta());
+        
+            let supported_types = vec![
+                "PDF", "ZIP", "RAR", "7Z", "JAR",
+                "JPEG", "PNG", "GIF", "BMP", "TIFF",
+                "MP3", "OGG", "WAV", "FLV", "FLAC", "MP4", "WEBM",
+                "EXE/DLL", "ELF", "Shell Script",
+                "AR", "TAR", "BZ2", "GZIP", "XZ",
+                "ISO 9660", "VHD Disk Image", "Microsoft CAB", "MSCF (Microsoft System File)",
+                "Parted Magic", "VMS Filesystem"
+            ];
+        
+            println!("\nDetection list:");
+            for file_type in supported_types {
+                println!("{}", format!("- {}", file_type).green());
+            }
+        
+            let sanitizable_files = vec![
+                "PDF", "comming soon JPG, PNG, GIF"
+            ];
+        
+            println!("\nSanitizable files (can be cleaned/removed):");
+            for file_type in sanitizable_files {
+                println!("{}", format!("- {}", file_type).yellow());
+            }
         }
 
         Some(("update", _)) => {

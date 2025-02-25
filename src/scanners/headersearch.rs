@@ -78,7 +78,7 @@ pub fn is_polyglot(file: &str) -> bool {
         }
         if detected_signatures.len() > 1 {
             println!(
-                "Potential polyglot file detected! Contains signatures for: {:?}",
+                "Potential polyglot file detected! {} Contains signatures for: {:?}", path.to_string_lossy(),
                 detected_signatures
             );
             return true;
