@@ -129,7 +129,7 @@ pub fn analyze_file(file: &str) {
 
     match entropy::calculate_entropy(path.to_str().unwrap())
     {
-        Ok(entropy) => println!("The entropy of the file is: {}", entropy),
+        Ok(entropy) => println!("The entropy of the file is: {:?}", entropy),
         Err(e) => eprintln!("Error reading the file: {}", e),
     }
 }
