@@ -56,7 +56,12 @@ fn main()
                     .long("verbose")
                     .action(clap::ArgAction::SetTrue) 
                     .default_value("false") 
-                    .help("Enable verbose output")),
+                    .help("Enable verbose output"))
+                .arg(Arg::new("sanitize")
+                    .short('s')
+                    .long("sanitize")
+                    .help("Sanitize the after before scanning")
+                    .action(clap::ArgAction::SetTrue)),
         )
         .subcommand(
             Command::new("scan-dir")
@@ -74,6 +79,13 @@ fn main()
                     .default_value("false") 
                     .help("Enable verbose output")
                 )
+                .arg(Arg::new("sanitize")
+                    .short('s')
+                    .long("sanitize")
+                    .action(clap::ArgAction::SetTrue)
+                    .help("Sanitize the after before scanning")
+                )
+                
                 .arg(
                     Arg::new("recursive")
                         .short('r')
@@ -120,10 +132,15 @@ fn main()
                 scanners::headersearch::analyze_file(file);
             }
             
-            match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&file) {
-                    Ok(_) => println!("PDF sanitized successfully."),
-                    Err(err) => println!("Sanitization failed: {}", err),
-                }
+
+            if sub_m.get_flag("sanitize") 
+            {
+                println!("{}", "Sanitizing file...".yellow());
+                match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&file) {
+                        Ok(_) => println!("PDF sanitized successfully."),
+                        Err(err) => println!("Sanitization failed: {}", err),
+                    }
+            }
 
             if scanners::headersearch::is_polyglot(file) {
                 println!("{}", "Potential polyglot file detected!".red());
@@ -151,15 +168,23 @@ fn main()
                     if scanners::headersearch::is_polyglot(entry) {
                         println!("{}", "Potential polyglot file detected!".red());
                         _count += 1;
+
+                        if sub_m.get_flag("sanitize") 
+                        {
+                            println!("{}", "Sanitizing file...".yellow());
+                            match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&entry) {
+                                    Ok(_) => println!("PDF sanitized successfully."),
+                                    Err(err) => println!("Sanitization failed: {}", err),
+                                }
+                        }
+
                     } else {
                         println!("{}", "Scan complete. No threats detected.".blue());
                     }
                     }
-                    
-        
-                   
                 }
             }
+            
             if verbose {
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
                 scanners::headersearch::analyze_file(dir);
