@@ -1,5 +1,7 @@
 /target
-dilly_defender-1.0/*
+dilly_defender-*/*
+dilly-defender-*/*
 *.pdf
 ./app.*
 *.log
+*.deb
