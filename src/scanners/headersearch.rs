@@ -53,6 +53,7 @@ const MAGIC_BYTES: &[(&[u8], &str)] = &[
 ];
 
 pub fn is_polyglot(file: &str) -> bool {
+    use entropy::calculate_entropy; 
 
     let path = Path::new(file);
     if !path.exists() {
@@ -61,32 +62,65 @@ pub fn is_polyglot(file: &str) -> bool {
     }
 
     info!("Checking for polyglot file: {}", path.to_string_lossy());
-    
-    let filesize = 100000000;
-    let mut buffer = vec![0; filesize]; 
-    let file = File::open(file).expect("Unable to open file");
-    let mut reader = BufReader::new(file);
 
-    if let Ok(bytes_read) = reader.read(&mut buffer) {
+    let mut file = File::open(file).expect("Unable to open file");
+    let mut reader = BufReader::new(&mut file);
+    let mut buffer = [0; 4096];  
+
+    let mut detected_signatures = Vec::new();
+
+    while let Ok(bytes_read) = reader.read(&mut buffer) {
+        if bytes_read == 0 {
+            break; 
+        }
+
         let file_content = &buffer[..bytes_read];
-        let mut detected_signatures = Vec::new();
         for (magic, file_type) in MAGIC_BYTES.iter() {
-
             if file_content.windows(magic.len()).any(|window| window == *magic) {
                 detected_signatures.push(*file_type);
             }
         }
+        
         if detected_signatures.len() > 1 {
             println!(
-                "Potential polyglot file detected! {} Contains signatures for: {:?}", path.to_string_lossy(),
+                "Potential polyglot file detected! {} Contains signatures for: {:?}", 
+                path.to_string_lossy(),
                 detected_signatures
             );
             return true;
         }
     }
 
+    let entropy_score = match calculate_entropy(path.to_str().unwrap()) {
+        Ok(entropy) => entropy.0, 
+        Err(e) => {
+            eprintln!("Error calculating entropy: {}", e);
+            return false; 
+        }
+    };
+
+    let mut polyglot_score = detected_signatures.len() as f64;  
+    let entropy_threshold = 7.5; 
+
+    if entropy_score > entropy_threshold {
+        polyglot_score += (entropy_score - entropy_threshold) * 2.0; 
+    }
+
+    let detection_threshold = 3.0; 
+    if polyglot_score >= detection_threshold {
+        println!(
+            "Potential polyglot file detected! {} | Score: {:.2} (Entropy: {:.6})", 
+            path.to_string_lossy(),
+            polyglot_score,
+            entropy_score
+        );
+        return true;
+    }
+
     false
 }
+
+
 
 pub fn analyze_file(file: &str) {
     let path = Path::new(file);
@@ -129,7 +163,7 @@ pub fn analyze_file(file: &str) {
 
     match entropy::calculate_entropy(path.to_str().unwrap())
     {
-        Ok(entropy) => println!("The entropy of the file is: {:?}", entropy),
+        Ok(entropy) => println!("The entropy of the file is: {:?}", entropy.0),
         Err(e) => eprintln!("Error reading the file: {}", e),
     }
 }
