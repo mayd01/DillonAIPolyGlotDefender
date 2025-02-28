@@ -38,7 +38,9 @@ def list_and_download_datasets(search_term, file_types, download_dir, max_result
             )
             dataset_metadata = dataset_files_result.stdout.decode('utf-8')
 
-            # Check if any of the files have the specified file types
+            # Print the metadata for debugging
+            print(f"Metadata for {dataset_name}: {dataset_metadata[:500]}")  # Print the first 500 chars for brevity
+
             if any(file_type in dataset_metadata for file_type in file_types):
                 print(f"Downloading dataset: {dataset_name}")
                 # Download the dataset
@@ -52,15 +54,11 @@ def list_and_download_datasets(search_term, file_types, download_dir, max_result
         return []
 
 def main():
-    search_term = 'image' 
-    file_types = [
-    "pdf", "png", "tiff", "zip", "7z", "rar", "iso", 
-    "tar", "ps", "mp4", "ar", "bmp", "bz2", "cab", "flac", 
-    "gif", "gz", "ico", "jpg", "ogg", "psd", "rtf", "bpg", 
-    "java", "pcap", "xz"
-]
-    download_dir = '/mnt/shared' 
+    search_term = 'document'  # Search for datasets related to documents (more general)
+    file_types = ["text"]  # Filter only PDFs
+    download_dir = '/mnt/shared'  # Specify download location
     
+    # Call the function to download datasets
     downloaded_datasets = list_and_download_datasets(search_term, file_types, download_dir, max_results=10)
 
     if downloaded_datasets:
