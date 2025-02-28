@@ -12,8 +12,11 @@ def extract_byte_features(file_path, max_bytes=4096):
     return feature_vector
 
 # Directory with "good" files for training
-good_files_dir = "path/to/good/files"
-good_files = [os.path.join(good_files_dir, f) for f in os.listdir(good_files_dir)]
+good_files_dir = "path/to/good/files"  # Ensure the correct path is set
+if not os.path.exists(good_files_dir):
+    raise FileNotFoundError(f"Directory {good_files_dir} not found!")
+
+good_files = [os.path.join(good_files_dir, f) for f in os.listdir(good_files_dir) if os.path.isfile(os.path.join(good_files_dir, f))]
 good_features = np.array([extract_byte_features(f) for f in good_files])
 
 # Train the Isolation Forest model
@@ -28,7 +31,7 @@ print(f"Model saved as {model_filename}")
 def detect_polyglot(file_path, model):
     """Predict if a file is a polyglot/anomaly using the pre-trained model."""
     feature_vector = extract_byte_features(file_path).reshape(1, -1)
-    prediction = model.predict(feature_vector) 
+    prediction = model.predict(feature_vector)
     return "Polyglot File Detected!" if prediction[0] == -1 else "File is Normal."
 
 # Load the model back for use
@@ -36,5 +39,5 @@ loaded_model = joblib.load(model_filename)
 print(f"Model loaded from {model_filename}")
 
 # Test file detection
-test_file = "path/to/test/file"
+test_file = "path/to/test/file"  # Ensure the correct test file path is set
 print(detect_polyglot(test_file, loaded_model))
