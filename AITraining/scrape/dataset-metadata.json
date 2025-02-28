@@ -1,0 +1,44 @@
+{
+  "id": "xhlulu/huggingface-bert",
+  "id_no": 934701,
+  "datasetSlugNullable": "huggingface-bert",
+  "ownerUserNullable": "xhlulu",
+  "usabilityRatingNullable": 0.875,
+  "titleNullable": "Huggingface BERT",
+  "subtitleNullable": "BERT models directly retrieved and updated from: https://huggingface.co/",
+  "descriptionNullable": "This dataset contains many popular BERT weights retrieved directly on [Hugging Face's model repository](https://huggingface.co/models), and hosted on Kaggle. It will be automatically updated every month to ensure that the latest version is available to the user.  By making it a dataset, it is significantly faster to load the weights since you can directly attach a Kaggle dataset to the notebook rather than downloading the data every time. See the [speed comparison notebook](https://www.kaggle.com/xhlulu/loading-bert-speed-comparison).\n\n\n*The banner was adapted from figures by [Jimmy Lin](https://twitter.com/lintool) ([tweet](https://twitter.com/lintool/status/1285599163024125959); [slide](https://docs.google.com/presentation/d/1HMng1RWuY1molsGamwIpRnxNZNEqEPRVODcXpm-pX4c/)) released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). BERT has an Apache 2.0 license according to the model repository.*\n\n\n### Quick Start\n\nTo use this dataset, simply attach it the your notebook and specify the path to the dataset. For example:\n\n```python\nfrom transformers import AutoTokenizer, AutoModelForMaskedLM\n\nMODEL_DIR = \"/kaggle/input/huggingface-bert/\"\ntokenizer = AutoTokenizer.from_pretrained(MODEL_DIR + \"bert-large-uncased\")\nmodel = AutoModelForMaskedLM.from_pretrained(MODEL_DIR + \"bert-large-uncased\")\n```\n\n\n### Acknowledgements\n\nAll the copyrights and IP relating to BERT belong to the original authors (Devlin et. al 2019) and Google. All copyrights relating to the transformers library belong to Hugging Face. The banner image was created thanks to Jimmy Lin so any modification of this figure should mention the original author and respect the conditions of the license; all copyrights related to the images belong to him.\n\nSome of the models are community created or trained. Please reach out directly to the authors if you have questions regarding licenses and usage.\n\n",
+  "datasetId": 934701,
+  "datasetSlug": "huggingface-bert",
+  "hasDatasetSlug": true,
+  "ownerUser": "xhlulu",
+  "hasOwnerUser": true,
+  "usabilityRating": 0.875,
+  "hasUsabilityRating": true,
+  "totalViews": 40051,
+  "totalVotes": 199,
+  "totalDownloads": 2446,
+  "title": "Huggingface BERT",
+  "hasTitle": true,
+  "subtitle": "BERT models directly retrieved and updated from: https://huggingface.co/",
+  "hasSubtitle": true,
+  "description": "This dataset contains many popular BERT weights retrieved directly on [Hugging Face's model repository](https://huggingface.co/models), and hosted on Kaggle. It will be automatically updated every month to ensure that the latest version is available to the user.  By making it a dataset, it is significantly faster to load the weights since you can directly attach a Kaggle dataset to the notebook rather than downloading the data every time. See the [speed comparison notebook](https://www.kaggle.com/xhlulu/loading-bert-speed-comparison).\n\n\n*The banner was adapted from figures by [Jimmy Lin](https://twitter.com/lintool) ([tweet](https://twitter.com/lintool/status/1285599163024125959); [slide](https://docs.google.com/presentation/d/1HMng1RWuY1molsGamwIpRnxNZNEqEPRVODcXpm-pX4c/)) released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). BERT has an Apache 2.0 license according to the model repository.*\n\n\n### Quick Start\n\nTo use this dataset, simply attach it the your notebook and specify the path to the dataset. For example:\n\n```python\nfrom transformers import AutoTokenizer, AutoModelForMaskedLM\n\nMODEL_DIR = \"/kaggle/input/huggingface-bert/\"\ntokenizer = AutoTokenizer.from_pretrained(MODEL_DIR + \"bert-large-uncased\")\nmodel = AutoModelForMaskedLM.from_pretrained(MODEL_DIR + \"bert-large-uncased\")\n```\n\n\n### Acknowledgements\n\nAll the copyrights and IP relating to BERT belong to the original authors (Devlin et. al 2019) and Google. All copyrights relating to the transformers library belong to Hugging Face. The banner image was created thanks to Jimmy Lin so any modification of this figure should mention the original author and respect the conditions of the license; all copyrights related to the images belong to him.\n\nSome of the models are community created or trained. Please reach out directly to the authors if you have questions regarding licenses and usage.\n\n",
+  "hasDescription": true,
+  "isPrivate": false,
+  "keywords": [
+    "clothing and accessories",
+    "computer science",
+    "nlp",
+    "neural networks",
+    "transformers",
+    "pre-trained model"
+  ],
+  "licenses": [
+    {
+      "nameNullable": "other",
+      "name": "other",
+      "hasName": true
+    }
+  ],
+  "collaborators": [],
+  "data": []
+}
