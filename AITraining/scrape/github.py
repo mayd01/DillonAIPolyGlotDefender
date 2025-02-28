@@ -2,48 +2,102 @@ import os
 import requests
 
 GITHUB_TOKEN = "REMOVEDydOkFdxaLqEsU7bEq4gQvKhkEoBm5Q0M0ePT"
-GITHUB_API_URL = "https://api.github.com/search/code"
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
 def get_github_files(extension, max_results=5000):
     """
-    Search GitHub for files of a specific extension in all repositories.
+    Search GitHub for files of a specific extension.
     """
     query = f"extension:{extension}"
-    params = {"q": query, "per_page": max_results}
+    url = f"https://api.github.com/search/code?q={query}&per_page={max_results}"
     
-    response = requests.get(GITHUB_API_URL, headers=HEADERS, params=params)
+    response = requests.get(url, headers=HEADERS)
     
     if response.status_code == 200:
-        data = response.json()
-        return data['items']
+        return response.json().get('items', [])
     else:
         print(f"Error {response.status_code}: {response.text}")
         return []
 
-def download_github_file(file_url, download_path):
+def get_default_branch(repo_full_name):
     """
-    Download a file from GitHub using its URL.
+    Fetch the default branch of a repository.
     """
-    response = requests.get(file_url, headers=HEADERS)
+    url = f"https://api.github.com/repos/{repo_full_name}"
+    response = requests.get(url, headers=HEADERS)
+    
     if response.status_code == 200:
+        return response.json().get("default_branch", "main")
+    return "main"
+
+def get_lfs_download_url(repo_full_name, file_path):
+    """
+    Fetch the actual file download URL if stored in Git LFS.
+    """
+    url = f"https://api.github.com/repos/{repo_full_name}/contents/{file_path}"
+    response = requests.get(url, headers=HEADERS)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("download_url")  # Actual file URL
+    return None
+
+def download_github_file(file_info, download_path):
+    """
+    Download a file from GitHub using the correct branch.
+    Detects if the file is stored in Git LFS and fetches it.
+    """
+    repo_full_name = file_info['repository']['full_name']
+    file_path = file_info['path']
+
+    # Detect the default branch
+    branch = get_default_branch(repo_full_name)
+
+    # Try to download from the raw GitHub content URL
+    raw_url = f"https://raw.githubusercontent.com/{repo_full_name}/{branch}/{file_path}"
+    response = requests.get(raw_url, headers=HEADERS)
+
+    if response.status_code == 200:
+        content = response.content
+
+        # Check if it's a Git LFS pointer file
+        if b"version https://git-lfs.github.com/spec/v1" in content:
+            print(f"File {file_info['name']} is stored using Git LFS. Fetching actual file...")
+            actual_url = get_lfs_download_url(repo_full_name, file_path)
+            if actual_url:
+                response = requests.get(actual_url, headers=HEADERS)
+                if response.status_code == 200:
+                    content = response.content
+                else:
+                    print(f"Failed to download LFS file: {response.status_code}")
+                    return
+            else:
+                print("Could not determine LFS file download URL.")
+                return
+        
         with open(download_path, 'wb') as f:
-            f.write(response.content)
-            print(f"Downloaded file: {download_path}")
+            f.write(content)
+            print(f"Downloaded: {download_path}")
     else:
-        print(f"Failed to download file: {file_url}")
+        print(f"Failed to download: {raw_url} (Status: {response.status_code})")
 
 if __name__ == "__main__":
-    extensions = ["zip", "rar", "jpg", "png", "pdf"]
+    file_signatures = [
+    "pdf", "png", "tiff", "zip", "7z", "rar", "iso", 
+    "tar", "ps", "mp4", "ar", "bmp", "bz2", "cab", "flac", 
+    "gif", "gz", "ico", "jpg", "ogg", "psd", "rtf", "bpg", 
+    "java", "pcap", "xz"
+]
+
+    extensions = file_signatures
     for ext in extensions:
         print(f"Searching GitHub for {ext} files...")
         files = get_github_files(ext)
         if files:
-            os.makedirs(f"downloads/{ext}", exist_ok=True)
-            for file in files:
-                file_url = file['html_url']
-                file_name = file_url.split('/')[-1] + f".{ext}"
-                download_path = os.path.join("downloads", ext, file_name)
-                download_github_file(file_url, download_path)
+            os.makedirs(f"/mnt/shared/downloads/{ext}", exist_ok=True)
+            for file_info in files:
+                file_name = file_info['name']
+                download_path = os.path.join("/mnt/shared/downloads", ext, file_name)
+                download_github_file(file_info, download_path)
         else:
             print(f"No {ext} files found on GitHub.")

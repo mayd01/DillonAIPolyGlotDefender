@@ -27,7 +27,7 @@ def extract_byte_sequence(file_path, seq_length=4096):
         return normalized_sequence[:seq_length]
 
 # Load good files
-good_files_dir = "path/to/good/files"
+good_files_dir = "/mnt/shared/downloads/"
 good_files = [os.path.join(good_files_dir, f) for f in os.listdir(good_files_dir)]
 good_sequences = np.array([extract_byte_sequence(f) for f in good_files])
 
@@ -54,17 +54,22 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']
 model.fit(X_train, np.ones(len(X_train)), epochs=10, batch_size=16, verbose=1)
 
 
-# Function to detect anomalies in a file
-def detect_polyglot(file_path):
-    """Predict if a file is an anomaly (polyglot) based on LSTM model."""
-    file_sequence = extract_byte_sequence(file_path).reshape(1, 4096, 1)
-    prediction = model.predict(file_sequence)[0][0]
-    
-    if prediction < 0.5:  # Lower confidence = more likely polyglot
-        return "⚠️ Polyglot File Detected!"
-    else:
-        return "✅ File is Normal."
+# Save trained model
+model.save("polyglot_detector.h5")
+print("Model saved successfully!")
 
-# Test on a new file
-test_file = "path/to/test/file"
-print(detect_polyglot(test_file))
+
+# # Function to detect anomalies in a file
+# def detect_polyglot(file_path):
+#     """Predict if a file is an anomaly (polyglot) based on LSTM model."""
+#     file_sequence = extract_byte_sequence(file_path).reshape(1, 4096, 1)
+#     prediction = model.predict(file_sequence)[0][0]
+    
+#     if prediction < 0.5:  # Lower confidence = more likely polyglot
+#         return "⚠️ Polyglot File Detected!"
+#     else:
+#         return "✅ File is Normal."
+
+# # Test on a new file
+# test_file = "path/to/test/file"
+# print(detect_polyglot(test_file))
