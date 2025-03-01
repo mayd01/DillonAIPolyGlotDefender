@@ -13,7 +13,7 @@ file_extensions = [
     "pdf", "png", "tiff", "zip", "7z", "rar", "iso", 
     "tar", "ps", "mp4", "ar", "bmp", "bz2", "cab", "flac", 
     "gif", "gz", "ico", "jpg", "ogg", "psd", "rtf", "bpg", 
-    "java", "pcap", "xz"
+    "java", "pcap", "xz", "csv", "txt", "json", "xml", "jpeg", "jar" , "docx", "pptx", "xlsx", "doc", "ppt", "xls"
 ]
 
 def validate_pdf_file(filepath):
