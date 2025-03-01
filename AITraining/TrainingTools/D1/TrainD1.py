@@ -30,7 +30,7 @@ def load_dataset(polyglot_dir, non_polyglot_dir):
     return np.array(X, dtype=object), np.array(y)
 
 polyglot_dir = "path/to/polyglot_files"
-non_polyglot_dir = "path/to/non_polyglot_files"
+non_polyglot_dir = "path/to/non-polyglot_files"
 
 X, y = load_dataset(polyglot_dir, non_polyglot_dir)
 

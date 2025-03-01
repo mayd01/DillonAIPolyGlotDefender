@@ -23,7 +23,7 @@ def extract_byte_sequence(file_path, seq_length=4096):
         return normalized_sequence[:seq_length]
 
 # Load the trained model
-model = load_model("bad_file_anomaly_detector.h5")
+model = load_model("bad_file_anomaly_detector_improved.h5")
 
 def classify_file(file_path):
     """Classify a file as 'bad' or 'good'."""
