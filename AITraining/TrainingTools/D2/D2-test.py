@@ -3,13 +3,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-# Function to extract specific byte regions from files
 def extract_features(file_path, regions=[(0, 256), (-256, None)]):
     try:
         with open(file_path, "rb") as f:
             data = f.read()
 
-        if len(data) < 256:  # Handle small files
+        if len(data) < 256:
             print(f"Skipping {file_path}: File too small")
             return None
 
@@ -34,7 +33,7 @@ def test_file(file_path):
         prediction = model.predict(features_padded)[0][0]
         print(f"\nFile: {file_path}")
         print(f"Prediction Score: {prediction:.4f}")
-        print("✅ Polyglot Detected!" if prediction >= 0.5 else "❌ Not a Polyglot File")
+        print("Polyglot Detected!" if prediction >= 0.5 else " Not a Polyglot File")
     else:
         print("Feature extraction failed.")
 
