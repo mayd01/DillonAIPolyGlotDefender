@@ -1,0 +1,9 @@
+D1-mini-o autoencoder neural network
+D1-med Binary classification using a fully connected neural network
+
+D2-mini  Isolation Forest
+D2-0 1D Convolutional Neural Network
+
+D3-0  Long Short-Term Memory.
+D3-1 LSM combine data
+D3-2 LSM Bad data

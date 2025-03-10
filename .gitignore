@@ -4,4 +4,6 @@ dilly-defender-*/*
 *.pdf
 ./app.*
 *.log
+
+*.h5
 *.deb
