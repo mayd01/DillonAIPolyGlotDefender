@@ -5,3 +5,4 @@ dilly-defender-*/*
 ./app.*
 *.log
 *.deb
+*.h5
