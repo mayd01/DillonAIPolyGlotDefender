@@ -1,6 +1,6 @@
 import numpy as np
 from tensorflow import keras
-from malconv2 import MalConv2  # Replace with actual model code
+from malconv2 import MalConv2, load_dataset  # Replace with actual model code
 
 model = keras.models.load_model("./models/malconv2_model.h5")
 

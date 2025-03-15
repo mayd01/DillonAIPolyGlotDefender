@@ -49,7 +49,6 @@ def file_size_check(url):
     response = requests.head(url, headers=HEADERS)
     if response.status_code == 200:
         file_size = int(response.headers.get('Content-Length', 0))
-        return file_size > 256
     return False
 
 def download_github_file(file_info, download_path):
@@ -67,9 +66,9 @@ def download_github_file(file_info, download_path):
     raw_url = f"https://raw.githubusercontent.com/{repo_full_name}/{branch}/{file_path}"
     
     # Check if the file size is larger than 256 bytes
-    if not file_size_check(raw_url):
-        print(f"File {file_info['name']} is too small (< 256 bytes), skipping download.")
-        return
+    # if not file_size_check(raw_url):
+    #     print(f"File {file_info['name']} is too small (< 256 bytes), skipping download.")
+    #     return
 
     response = requests.get(raw_url, headers=HEADERS)
 
@@ -99,10 +98,7 @@ def download_github_file(file_info, download_path):
 
 if __name__ == "__main__":
     file_signatures = [
-        "pdf", "png", "tiff", "zip", "7z", "rar", "iso", 
-        "tar", "ps", "mp4", "ar", "bmp", "bz2", "cab", "flac", 
-        "gif", "gz", "ico", "jpg", "ogg", "psd", "rtf", "bpg", 
-        "java", "pcap", "xz"
+        "zip"
     ]
 
     extensions = file_signatures
