@@ -1,19 +1,35 @@
 import numpy as np
 from tensorflow import keras
 from tensorflow.keras import layers
+from tensorflow.keras import layers, models
+from tensorflow.keras import regularizers
 
 def create_model(input_shape=(1000000,)):
-    """Create and return the MalConv2 model."""
-    model = keras.Sequential([
+    model = models.Sequential([
         layers.InputLayer(input_shape=input_shape),
         layers.Reshape((input_shape[0], 1)), 
-        layers.Conv1D(64, 3, padding='same', activation='relu'),
-        layers.Conv1D(128, 3, padding='same', activation='relu'),
-        layers.Conv1D(256, 3, padding='same', activation='relu'),
-        layers.GlobalMaxPooling1D(),
-        layers.Dense(256, activation='relu'),
-        layers.Dense(2, activation='softmax')  
+        
+        # Convolutional layers with more filters
+        layers.Conv1D(64, 5, activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling1D(pool_size=2),
+        
+        layers.Conv1D(128, 5, activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling1D(pool_size=2),
+        
+        layers.Conv1D(256, 5, activation='relu', padding='same'),
+        layers.BatchNormalization(),
+        layers.MaxPooling1D(pool_size=2),
+        
+        layers.GlobalMaxPooling1D(),  # or Flatten
+        
+        # Fully connected layers
+        layers.Dense(512, activation='relu', kernel_regularizer=regularizers.l2(0.01)),
+        layers.Dropout(0.5),  # Dropout to prevent overfitting
+        layers.Dense(3, activation='softmax')  # Change to multi-class for polyglot/virus types
     ])
+    
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model
 

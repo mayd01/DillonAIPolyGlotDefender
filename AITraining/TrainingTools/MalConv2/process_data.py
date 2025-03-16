@@ -49,7 +49,7 @@ def preprocess_and_save_data(input_directory, output_directory, max_size=1000000
     print(f"Preprocessing complete. Data saved to {output_directory}")
 
 if __name__ == "__main__":
-    input_directory = "./mnt/shared"
-    output_directory = "./data/processed"
+    input_directory = "/data"
+    output_directory = "/data/processed"
     
     preprocess_and_save_data(input_directory, output_directory)
