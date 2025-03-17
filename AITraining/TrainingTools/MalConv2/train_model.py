@@ -5,11 +5,11 @@ from malconv2 import MalConv2, create_model
 from process_data import preprocess_and_save_data  # Import the preprocessing function
 
 # Preprocess data and save it (This can be done separately before training)
-# preprocess_and_save_data("/data", "/data/processed")
+# preprocess_and_save_data("/mnt/IronVault", "/mnt/IronVault/processed")
 
 # Load preprocessed data (you only need to do this after preprocessing is complete)
-X = np.load("/data/processed/X.npy")
-y = np.load("/data/processed/y.npy")
+X = np.load("/mnt/IronVault/processed/X.npy")
+y = np.load("/mnt/IronVault/processed/y.npy")
 
 # Reshape X for the model input (required for 1D convolutions)
 X = X.reshape(X.shape[0], X.shape[1], 1)

@@ -6,3 +6,4 @@ dilly-defender-*/*
 *.log
 *.deb
 *.h5
+*nohup*

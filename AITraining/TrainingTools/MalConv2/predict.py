@@ -16,4 +16,4 @@ def predict_file(file_path):
     else:
         print("The file is not a polyglot.")
 
-    predict_file("./data/new_file_to_predict.exe")
+    predict_file("./mnt/IronVault/new_file_to_predict.exe")

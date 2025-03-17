@@ -35,8 +35,8 @@ def load_dataset(polyglot_dir, non_polyglot_dir):
     
     return np.array(X, dtype=np.float32), np.array(y, dtype=np.int32)  
 
-polyglot_dir = "/data/polyglots"
-non_polyglot_dir = "/data/non-polyglots"
+polyglot_dir = "/mnt/IronVault/polyglots"
+non_polyglot_dir = "/mnt/IronVault/non-polyglots"
 
 print("Loading dataset...")
 X, y = load_dataset(polyglot_dir, non_polyglot_dir)
