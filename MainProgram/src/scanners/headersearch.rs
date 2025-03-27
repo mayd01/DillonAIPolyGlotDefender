@@ -87,10 +87,10 @@ pub fn is_polyglot(file: &str) -> bool {
                 path.to_string_lossy(),
                 detected_signatures
             );
-            return true;
+            break;
         }
     }
-
+    
     let entropy_score = match calculate_entropy(path.to_str().unwrap()) {
         Ok(entropy) => entropy.0, 
         Err(e) => {
@@ -105,8 +105,8 @@ pub fn is_polyglot(file: &str) -> bool {
     if entropy_score > entropy_threshold {
         polyglot_score += (entropy_score - entropy_threshold) * 2.0; 
     }
-
-    let detection_threshold = 3.0; 
+    
+    let detection_threshold = 2.0; 
     if polyglot_score >= detection_threshold {
         println!(
             "Potential polyglot file detected! {} | Score: {:.2} (Entropy: {:.6})", 

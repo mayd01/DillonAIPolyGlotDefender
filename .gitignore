@@ -6,3 +6,5 @@ dilly-defender-*/*
 *.log
 *.deb
 *.h5
+dillylog.log
+app.log
