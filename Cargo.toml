@@ -1,5 +1,8 @@
 [workspace]
 members = [
-    "Factory",
-    "libs/watcher-lib"
+    "MainProgram",
+    "libs/watcher_lib",
+    "libs/logging_lib"
 ]
+
+resolver = "3"

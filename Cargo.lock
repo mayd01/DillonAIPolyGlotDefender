@@ -323,7 +323,9 @@ dependencies = [
  "colored",
  "fern",
  "log",
+ "logging_lib",
  "lopdf",
+ "watcher_lib",
 ]
 
 [[package]]
@@ -576,6 +578,18 @@ name = "log"
 version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30bde2b3dc3671ae49d8e2e9f044c7c005836e7a023ee57cffa25ab82764bb9e"
+
+[[package]]
+name = "logging_lib"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "colored",
+ "fern",
+ "log",
+ "lopdf",
+]
 
 [[package]]
 name = "lopdf"
@@ -1014,9 +1028,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "watcher-lib"
+name = "watcher_lib"
 version = "0.1.0"
 dependencies = [
+ "log",
  "notify",
  "tempfile",
 ]

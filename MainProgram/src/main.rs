@@ -1,46 +1,25 @@
 use clap::{Arg, Command};
 use colored::*;
-use std::fs;
+use std::time::Duration;
+use std::{fs, thread};
 use std::path::Path;
 mod scanners;
 mod scrubber;
-use fern::Dispatch;
-use chrono::Local;
-use std::fs::OpenOptions;
-
-
-fn setup_logger(log_file: &str) -> Result<(), fern::InitError> {
-    let log_file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(log_file)?;
-
-    Dispatch::new()
-        .format(|out, message, record| {
-            out.finish(format_args!(
-                "[{}] [{}] {}",
-                Local::now().format("%Y-%m-%d %H:%M:%S"),
-                record.level(),
-                message
-            ))
-        })
-        .level(log::LevelFilter::Debug) 
-        .chain(log_file) 
-        .apply()?;
-
-    Ok(())
-}
+use watcher_lib;
+use logging_lib;
+use std::env;
 
 fn main() 
 {
 
-    let log_file = "app.log";
+    let log_file = env::var("DLogger");
 
-    if let Err(e) = setup_logger(log_file) {
+    if let Err(e) = logging_lib::Logging::setup_logger(log_file.unwrap_or("DillyDefender.log".to_string()).as_str()) {
         eprintln!("Failed to initialize logger: {}", e);
         return;
     }
-
+   
+   
     let matches = Command::new("Dilly Defender")
         .version("1.0")
         .author("Dillon May")
@@ -62,6 +41,15 @@ fn main()
                     .long("sanitize")
                     .help("Sanitize the after before scanning")
                     .action(clap::ArgAction::SetTrue)),
+        )
+        .subcommand( 
+            Command::new("passive-scan")
+                .about("This is a passive scan that will run in the background, watching for new files and scanning them")
+                .arg(Arg::new("directory")
+                    .required(true)
+                    .short('d')
+                    .long("directory")
+                    .help("The directory to watch for new files"))
         )
         .subcommand(
             Command::new("scan-dir")
@@ -150,6 +138,27 @@ fn main()
 
         }
 
+        Some (("passive-scan", sub_m)) => {
+            let dir = sub_m.get_one::<String>("directory").unwrap();
+            log::info!("Watching directory: {}", dir);
+            
+            let watcher = watcher_lib::FileWatcher::new(dir);
+            
+            let callback = |file_path: String| {
+                log::info!("Callback invoked with file: {}", file_path);
+                if scanners::headersearch::is_polyglot(&file_path) {
+                    log::info!("{}", "Potential polyglot file detected!".red());
+                } else {
+                    log::info!("{}", "Scan complete. No threats detected.".blue());
+                }
+            };
+
+            if let Err(e) = watcher.watch(callback) {
+                log::info!("Error: {:?}", e);
+            }
+            
+        }
+        
         Some(("scan-dir", sub_m)) => {
             let dir = sub_m.get_one::<String>("directory").unwrap();
             let _recursive = sub_m.get_flag("recursive");
