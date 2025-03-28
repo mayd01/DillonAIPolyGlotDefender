@@ -1,0 +1,15 @@
+[package]
+name = "dilly_defender"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+colored = "2.1"  
+chrono = "0.4"
+log = "0.4"
+fern = "0.6"
+lopdf = "0.35.0"
+watcher_lib = { path = "../libs/watcher_lib" }
+logging_lib = { path = "../libs/logging_lib" }
+

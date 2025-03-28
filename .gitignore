@@ -9,3 +9,5 @@ dilly-defender-*/*
 *nohup*
 **/dist/*
 **/build/*
+dillylog.log
+app.log
