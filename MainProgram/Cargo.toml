@@ -12,4 +12,5 @@ fern = "0.6"
 lopdf = "0.35.0"
 watcher_lib = { path = "../libs/watcher_lib" }
 logging_lib = { path = "../libs/logging_lib" }
+ai_lib = { path = "../libs/ai_lib" }
 

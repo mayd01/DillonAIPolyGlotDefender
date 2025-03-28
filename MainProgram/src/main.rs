@@ -8,6 +8,10 @@ mod scrubber;
 use watcher_lib;
 use logging_lib;
 use std::env;
+use ai_lib::{
+    classify_file,
+    PolyglotError,
+};
 
 fn main() 
 {
@@ -215,7 +219,15 @@ fn main()
 
             println!("{}", format!("Using AI model: {}", model).green());
             println!("{}", format!("AI scanning initiated for: {}", file).blue());
+            
+            let model_path = "polyglot_cnn_detector_best.h5";
 
+            match classify_file(model_path, file) {
+                Ok(score) if score > 0.8 => println!("The file {} is predicted as Polyglot.", file_path),
+                Ok(_) => println!("The file {} is predicted as Non-Polyglot.", file_path),
+                Err(e) => eprintln!("Error: {}", e),
+            }
+            
             println!("{}", "AI scan complete. Potential threats found: 0.".green());
         }
 
