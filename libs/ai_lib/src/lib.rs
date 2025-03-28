@@ -1,52 +1,47 @@
-use tensorflow::{Graph, Session, SessionOptions, SessionRunArgs, Tensor};
-use std::fs::File;
-use std::io::{self, Read};
-use thiserror::Error;
+use std::process::{Command, Stdio};
+use std::io::{self, Write};
+use std::{env, fs};
+use regex::Regex;
 
-#[derive(Debug, Error)]
-pub enum PolyglotError {
-    #[error("File I/O error: {0}")]
-    FileIO(#[from] io::Error),
-    #[error("TensorFlow error: {0}")]
-    TensorFlowError(#[from] tensorflow::Status),
-    #[error("Invalid data format")]
-    InvalidData,
-}
-
-pub fn extract_features(file_path: &str, regions: &[(usize, Option<usize>)]) -> Result<Vec<f32>, PolyglotError> {
-    let mut file = File::open(file_path)?;
-    let mut data = Vec::new();
-    file.read_to_end(&mut data)?;
-
-    if data.len() < 256 {
-        eprintln!("Skipping {}: File too small", file_path);
-        return Err(PolyglotError::InvalidData);
-    }
-
-    let mut features = Vec::new();
-    for &(start, end) in regions {
-        let end_index = end.unwrap_or(data.len());
-        features.extend(data[start..end_index].iter().map(|&b| b as f32 / 255.0));
-    }
-
-    Ok(features)
-}
-
-pub fn classify_file(model_path: &str, file_path: &str) -> Result<f32, PolyglotError> {
-    let features = extract_features(file_path, &[(0, 256), (data.len().saturating_sub(256), None)])?;
+pub fn classify_file_with_python(file_path: &str) -> Result<String, io::Error> {
     
-    let mut graph = Graph::new();
-    let mut session = Session::new(&SessionOptions::new(), &graph)?;
+    let exe_dir = env::current_exe()?
+        .parent() 
+        .ok_or(io::Error::new(io::ErrorKind::NotFound, "Executable directory not found"))?
+        .to_path_buf();
+    
+    let script: std::path::PathBuf = exe_dir.join("Detect.py");
+    
+    let command = format!("python {} -F {}", script.display(), file_path);
+     print!("***{}", command);
+    
+    let output = Command::new("/home/dmay/myenv/bin/python")
+        .arg(script)
+        .arg("-F")
+        .arg(file_path) 
+        .stdout(Stdio::piped()) 
+        .stderr(Stdio::piped()) 
+        .output()?; 
 
-    let input_tensor = Tensor::new(&[1, features.len() as u64, 1]).with_values(&features)?;
-    let output_tensor = Tensor::new(&[1]);
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+        // Print the output for debugging purposes
+        println!("Output: {}", stdout);
+        match parse_prediction_score(&stdout) {
+            Some(score) => Ok(score),
+            None => Err(io::Error::new(io::ErrorKind::NotFound, "Prediction Score not found")),
+        }
+    } else {
+        let error_message = String::from_utf8_lossy(&output.stderr).to_string();
+        Err(io::Error::new(io::ErrorKind::Other, error_message))
+    }
+}
 
-    let mut run_args = SessionRunArgs::new();
-    run_args.add_feed("input_node", 0, &input_tensor);
-    let output_token = run_args.request_fetch("output_node", 0);
+fn parse_prediction_score(output: &str) -> Option<String> {
+    let re = Regex::new(r"predicted as\s+(\w+)").unwrap();
 
-    session.run(&mut run_args)?;
-    let output: f32 = run_args.fetch(output_token)?[0];
-
-    Ok(output)
+    if let Some(caps) = re.captures(output) {
+        return Some(caps[1].to_string());
+    }
+    None
 }

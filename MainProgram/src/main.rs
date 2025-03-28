@@ -8,10 +8,7 @@ mod scrubber;
 use watcher_lib;
 use logging_lib;
 use std::env;
-use ai_lib::{
-    classify_file,
-    PolyglotError,
-};
+use ai_lib::classify_file_with_python;
 
 fn main() 
 {
@@ -210,7 +207,9 @@ fn main()
             let file = sub_m.get_one::<String>("file").unwrap();
             let default_model = String::from("default");
             let model = sub_m.get_one::<String>("model").unwrap_or(&default_model);
-
+            
+            let absolute_path = fs::canonicalize(file)
+            .unwrap_or_else(|_| Path::new(file).to_path_buf());
 
             if !Path::new(file).exists() {
                 println!("{}", "Error: File not found.".red());
@@ -218,17 +217,21 @@ fn main()
             }
 
             println!("{}", format!("Using AI model: {}", model).green());
-            println!("{}", format!("AI scanning initiated for: {}", file).blue());
+            println!("{}", format!("AI scanning initiated for: {}", absolute_path.to_str().unwrap()).blue());
             
-            let model_path = "polyglot_cnn_detector_best.h5";
-
-            match classify_file(model_path, file) {
-                Ok(score) if score > 0.8 => println!("The file {} is predicted as Polyglot.", file_path),
-                Ok(_) => println!("The file {} is predicted as Non-Polyglot.", file_path),
-                Err(e) => eprintln!("Error: {}", e),
+            match classify_file_with_python(absolute_path.to_str().unwrap()) {
+                Ok(prediction_score) => {
+                    if prediction_score.matches("Polyglot").count() > 0 {
+                        println!("{}", "Potential Infection found".red());
+                    } else {
+                        println!("{}", format!("File is Safe").green());
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error running Python script for Model: {}", e);
+                }
             }
             
-            println!("{}", "AI scan complete. Potential threats found: 0.".green());
         }
 
         Some(("info", _)) => {

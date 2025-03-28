@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ndarray = "0.16.1"
-tensorflow = "0.21.0"
-thiserror = "2.0.12"
+regex = "1.5"
+
+
