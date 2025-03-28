@@ -7,3 +7,5 @@ dilly-defender-*/*
 *.deb
 *.h5
 *nohup*
+**/dist/*
+**/build/*

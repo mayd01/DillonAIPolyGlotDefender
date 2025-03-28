@@ -33,6 +33,14 @@ def create_model(input_shape=(1000000,)):
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model
 
+def read_file_bytes(file_path, max_size=1000000):
+        """Reads a file as bytes and pads it to max_size."""
+        print(f"Reading file: {file_path}")
+        with open(file_path, 'rb') as f:
+            file_bytes = f.read()
+        if len(file_bytes) < max_size:
+            file_bytes = file_bytes + b'\0' * (max_size - len(file_bytes))  
+        return file_bytes  # Return raw byte data
 class MalConv2:
     def __init__(self, model=None):
         """Initialize the MalConv2 model."""
@@ -43,7 +51,7 @@ class MalConv2:
 
     def train(self, X_train, y_train, X_test, y_test, epochs=10, batch_size=32):
         """Train the model."""
-        self.model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test))
+        self.model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test), verbose=1)
 
     def save(self, path):
         """Save the trained model to the given path."""
@@ -52,3 +60,5 @@ class MalConv2:
     def evaluate(self, X_test, y_test):
         """Evaluate the model on the test data."""
         return self.model.evaluate(X_test, y_test)
+    
+    

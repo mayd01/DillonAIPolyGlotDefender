@@ -7,14 +7,31 @@ from tensorflow.keras import regularizers
 import pickle
 
 def load_preprocessed_data(file_path):
+    """Load preprocessed dataset from a pickle file."""
     with open(file_path, "rb") as f:
         return pickle.load(f)
-
 print("Loading preprocessed dataset...")
-X_padded, y = load_preprocessed_data("preprocessed_data.pkl")
+X_padded, y, _ = load_preprocessed_data("/data/processed/preprocessed_data.pkl")
 print("Dataset loaded.")
 
+# Print the number of training samples
+print(f"Number of training samples: {len(X_padded)}")
+
+
 X_train, X_test, y_train, y_test = train_test_split(X_padded, y, test_size=0.2, random_state=42)
+
+y_train = np.array(y_train, dtype=np.float32)
+y_test = np.array(y_test, dtype=np.float32)
+
+
+y_train = y_train.reshape(-1)
+y_test = y_test.reshape(-1)
+
+# Check for NaN or Inf values
+assert not np.isnan(X_train).any(), "X_train contains NaN values!"
+assert not np.isnan(y_train).any(), "y_train contains NaN values!"
+assert not np.isinf(X_train).any(), "X_train contains Inf values!"
+assert not np.isinf(y_train).any(), "y_train contains Inf values!"
 
 max_length = X_padded.shape[1]
 
@@ -33,16 +50,19 @@ model = keras.Sequential([
     keras.layers.Dense(1, activation="sigmoid")
 ])
 
-print("Model summary:")
 model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+
+print("Model summary:")
 print(model.summary())
+
 checkpoint = keras.callbacks.ModelCheckpoint(
     "polyglot_cnn_detector_best.h5", save_best_only=True, monitor="val_accuracy", mode="max"
 )
 
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+
 print("Training model...")
-model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test), callbacks=[checkpoint])
+history = model.fit(X_train, y_train, epochs=30, batch_size=32, validation_data=(X_test, y_test), callbacks=[checkpoint])
 print("Training complete.")
 
 loss, accuracy = model.evaluate(X_test, y_test)
