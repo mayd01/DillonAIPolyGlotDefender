@@ -6,5 +6,8 @@ dilly-defender-*/*
 *.log
 *.deb
 *.h5
+*nohup*
+**/dist/*
+**/build/*
 dillylog.log
 app.log
