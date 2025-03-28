@@ -117,6 +117,32 @@ pub fn is_polyglot(file: &str) -> bool {
         return true;
     }
 
+    let entropy_score = match calculate_entropy(path.to_str().unwrap()) {
+        Ok(entropy) => entropy.0, 
+        Err(e) => {
+            eprintln!("Error calculating entropy: {}", e);
+            return false; 
+        }
+    };
+
+    let mut polyglot_score = detected_signatures.len() as f64;  
+    let entropy_threshold = 7.5; 
+
+    if entropy_score > entropy_threshold {
+        polyglot_score += (entropy_score - entropy_threshold) * 2.0; 
+    }
+
+    let detection_threshold = 3.0; 
+    if polyglot_score >= detection_threshold {
+        println!(
+            "Potential polyglot file detected! {} | Score: {:.2} (Entropy: {:.6})", 
+            path.to_string_lossy(),
+            polyglot_score,
+            entropy_score
+        );
+        return true;
+    }
+
     false
 }
 
