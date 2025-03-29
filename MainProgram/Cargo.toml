@@ -14,3 +14,5 @@ watcher_lib = { path = "../libs/watcher_lib" }
 logging_lib = { path = "../libs/logging_lib" }
 ai_lib = { path = "../libs/ai_lib" }
 
+#[cfg(target_os = "windows")]
+windows_lib = { path = "../libs/windows_lib" }

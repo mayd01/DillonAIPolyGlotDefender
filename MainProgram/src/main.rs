@@ -10,6 +10,9 @@ use logging_lib;
 use std::env;
 use ai_lib::classify_file_with_python;
 
+#[cfg(target_os = "windows")]
+use windows_lib::send_notification;
+
 fn main() 
 {
 
@@ -223,6 +226,13 @@ fn main()
                 Ok(prediction_score) => {
                     if prediction_score.matches("Polyglot").count() > 0 {
                         println!("{}", "Potential Infection found".red());
+                        #[cfg(target_os = "windows")]
+                        {
+                            match send_notification("Title", "This is a message.") {
+                                Ok(_) => println!("Notification sent!"),
+                                Err(e) => eprintln!("Error sending notification: {}", e),
+                            }
+                        }
                     } else {
                         println!("{}", format!("File is Safe").green());
                     }

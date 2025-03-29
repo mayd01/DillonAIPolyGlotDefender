@@ -3,7 +3,8 @@ members = [
     "MainProgram",
     "libs/watcher_lib",
     "libs/logging_lib", 
-    "libs/ai_lib"
+    "libs/ai_lib",
+    "libs/windows_lib"
 ]
 
 resolver = "2"
