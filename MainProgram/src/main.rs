@@ -122,6 +122,13 @@ fn main()
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
                 
                 scanners::headersearch::analyze_file(file);
+                #[cfg(target_os = "windows")]
+                {
+                    match send_notification("Title", "This is a message.") {
+                        Ok(_) => println!("Notification sent!"),
+                        Err(e) => eprintln!("Error sending notification: {}", e),
+                    }
+                }
             }
             
 
@@ -152,6 +159,13 @@ fn main()
                 log::info!("Callback invoked with file: {}", file_path);
                 if scanners::headersearch::is_polyglot(&file_path) {
                     log::info!("{}", "Potential polyglot file detected!".red());
+                    #[cfg(target_os = "windows")]
+                    {
+                        match send_notification("Title", "This is a message.") {
+                            Ok(_) => println!("Notification sent!"),
+                            Err(e) => eprintln!("Error sending notification: {}", e),
+                        }
+                    }
                 } else {
                     log::info!("{}", "Scan complete. No threats detected.".blue());
                 }
