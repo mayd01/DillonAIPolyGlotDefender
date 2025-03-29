@@ -20,14 +20,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ai_lib"
-version = "0.1.0"
-dependencies = [
- "ndarray",
- "tensorflow",
-]
-
-[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -427,6 +419,7 @@ dependencies = [
 name = "dilly_defender"
 version = "0.1.0"
 dependencies = [
+ "ai_lib",
  "chrono",
  "clap",
  "colored",
@@ -1075,27 +1068,6 @@ dependencies = [
  "bitflags 2.9.0",
 ]
 
-[[package]]
-name = "rolling-file"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8395b4f860856b740f20a296ea2cd4d823e81a2658cf05ef61be22916026a906"
-dependencies = [
- "chrono",
-]
-
-[[package]]
-name = "rustix"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7178faa4b75a30e269c71e61c353ce2748cf3d76f0c44c393f4e60abf49b825"
-dependencies = [
- "bitflags 2.9.0",
- "errno",
- "libc",
- "linux-raw-sys",
- "windows-sys 0.59.0",
-]
 
 [[package]]
 name = "rustversion"
