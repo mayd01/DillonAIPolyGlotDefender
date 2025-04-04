@@ -62,7 +62,7 @@ checkpoint = keras.callbacks.ModelCheckpoint(
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 print("Training model...")
-history = model.fit(X_train, y_train, epochs=30, batch_size=32, validation_data=(X_test, y_test), callbacks=[checkpoint])
+history = model.fit(X_train, y_train, epochs=256, batch_size=60, validation_data=(X_test, y_test), callbacks=[checkpoint])
 print("Training complete.")
 
 loss, accuracy = model.evaluate(X_test, y_test)
