@@ -122,13 +122,6 @@ fn main()
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
                 
                 scanners::headersearch::analyze_file(file);
-                #[cfg(target_os = "windows")]
-                {
-                    match send_notification("Title", "This is a message.") {
-                        Ok(_) => println!("Notification sent!"),
-                        Err(e) => eprintln!("Error sending notification: {}", e),
-                    }
-                }
             }
             
 
@@ -143,6 +136,13 @@ fn main()
 
             if scanners::headersearch::is_polyglot(file) {
                 println!("{}", "Potential polyglot file detected!".red());
+                #[cfg(target_os = "windows")]
+                {
+                    match send_notification("DMZ Defender Scan", &format!("Scan complete! {} {}", "Potential polyglot file detected!", file.as_str())) {
+                        Ok(_) => println!("Notification sent!"),
+                        Err(e) => eprintln!("Error sending notification: {}", e),
+                    }
+                }
             } else {
                 println!("{}", "Scan complete. No threats detected.".blue());
             }
