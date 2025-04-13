@@ -1,8 +1,6 @@
 use clap::{Arg, Command};
 use colored::*;
-use std::time::Duration;
-use std::{fs, thread};
-use std::path::Path;
+use std::{fs, path::Path};
 mod scanners;
 mod scrubber;
 use watcher_lib;
@@ -18,7 +16,7 @@ fn main()
 
     let log_file = env::var("DLogger");
 
-    if let Err(e) = logging_lib::Logging::setup_logger(log_file.unwrap_or("DillyDefender.log".to_string()).as_str()) {
+    if let Err(e) = logging_lib::Logging::setup_logger(log_file.unwrap_or("DillyDefender.log".to_string()).as_str(), 10, 5) {
         eprintln!("Failed to initialize logger: {}", e);
         return;
     }
@@ -114,13 +112,15 @@ fn main()
 
             if !Path::new(file).exists() {
                 println!("{}", "Error: File not found.".red());
+                log::info!("Error: File not found.");
                 std::process::exit(1);
             }
 
             println!("{}", format!("Scanning file: {}", file).green());
+            log::info!("Scanning file: {}", file);
+
             if verbose {
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
-                
                 scanners::headersearch::analyze_file(file);
             }
             
@@ -128,9 +128,11 @@ fn main()
             if sub_m.get_flag("sanitize") 
             {
                 println!("{}", "Sanitizing file...".yellow());
+                log::info!("Sanitizing file...");
                 match scrubber::fileTypeScrubber::PdfScrubber::sanitize_pdf(&file) {
-                        Ok(_) => println!("PDF sanitized successfully."),
-                        Err(err) => println!("Sanitization failed: {}", err),
+                        Ok(_) => {println!("PDF sanitized successfully."); log::info!("PDF sanitized successfully.");},
+
+                        Err(err) => {println!("Sanitization failed: {}", err); log::info!("Sanitization failed: {}", err);}
                     }
             }
 
@@ -145,6 +147,7 @@ fn main()
                 }
             } else {
                 println!("{}", "Scan complete. No threats detected.".blue());
+                log::info!("{}", "Scan complete. No threats detected.".blue());
             }
 
         }
@@ -184,10 +187,12 @@ fn main()
 
             if !Path::new(dir).is_dir() {
                 println!("{}", "Error: Directory not found.".red());
+                log::error!("Error: Directory not found.");
                 std::process::exit(1);
             }
             let mut _count: i32 = 0; 
             println!("{}", format!("Scanning directory: {}", dir).green());
+            log::info!("Scanning directory: {}", dir);
             let entries = fs::read_dir(dir).expect("Failed to read directory");
             for entry in entries {
                 if let Ok(entry) = entry {
@@ -207,6 +212,7 @@ fn main()
 
                     } else {
                         println!("{}", "Scan complete. No threats detected.".blue());
+                        log::info!("{}", "Scan complete. No threats detected.".blue());
                     }
                     }
                 }
@@ -218,6 +224,7 @@ fn main()
             }
             
             println!("{}", format!("Directory scan complete. Potential threats found: {}", _count).green());
+            log::info!("Directory scan complete. Potential threats found: {}", _count);
         }
 
         Some(("ai-scan", sub_m)) => {
@@ -230,6 +237,7 @@ fn main()
 
             if !Path::new(file).exists() {
                 println!("{}", "Error: File not found.".red());
+                log::error!("Error: File not found.");
                 std::process::exit(1);
             }
 
