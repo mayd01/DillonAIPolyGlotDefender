@@ -4,7 +4,11 @@ import tensorflow as tf
 from tensorflow import keras
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
+print("starting")
 def extract_features(file_path, regions=[(0, 256), (-256, None)]):
     try:
         with open(file_path, "rb") as f:
@@ -82,7 +86,7 @@ def main():
     parser.add_argument("-F", "--file", required=True, help="Path to the file to classify")
     args = parser.parse_args()
 
-    model = keras.models.load_model("polyglot_cnn_detector_best.h5")
+    model = keras.models.load_model("./bin/Detect/polyglot_cnn_detector_best.h5")
 
     file_path = args.file
     prediction = classify_file(model, file_path)

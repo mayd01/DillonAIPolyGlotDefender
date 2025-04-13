@@ -15,8 +15,7 @@ pub fn classify_file_with_python(file_path: &str) -> Result<String, io::Error> {
     let command = format!("python {} -F {}", script.display(), file_path);
      print!("***{}", command);
     
-    let output = Command::new("/home/dmay/myenv/bin/python")
-        .arg(script)
+    let output = Command::new("./bin/Detect/Detect.exe")
         .arg("-F")
         .arg(file_path) 
         .stdout(Stdio::piped()) 

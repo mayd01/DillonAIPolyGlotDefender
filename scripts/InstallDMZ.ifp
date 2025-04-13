@@ -1,0 +1,164 @@
+﻿[Header]
+ProjectFileVersion = 1.1
+[General]
+Program name = DillyDefender
+Program version = 1.0.0
+Windows XP = 0
+Windows Server 2003 = 0
+Windows Vista = 0
+Windows Server 2008 = 0
+Windows 7 = 0
+Windows 8 = 0
+Windows 10 = 0
+Windows Server 2016 = 0
+Windows Server 2019 = 0
+Windows Server 2022 = 0
+Windows 11 = 1
+DoNotCheckOS = 0
+Company name = Dillon May Enterprise AI and Cloud
+Website = https://dillonmay.com
+SFA = 0
+DFA = 1
+Comp = 1
+[Graphics]
+Wizard image = C:\Users\dtmay\Downloads\Defender.jpg
+Header image = C:\Users\dtmay\Downloads\Defender.jpg
+Show Label = 1
+VisualStylesEnabled = 1
+[Files]
+Installation path = <ProgramFiles>\<AppName>\
+Autcip = 1
+[Uninstall]
+Vwau = 0
+Website = https://
+Include uninstaller = 1
+Uninstaller filename = Uninstall
+UseCustomDisplayIcon = 0
+CustomDisplayIcon = <InstallPath>\
+[Licence]
+Licence dialog = 1
+[Finish]
+Sart program = 0
+Reboot computer = 0
+Program = <InstallPath>\
+ProgramArguments = 
+[Shortcuts]
+Allowtc = 1
+Shortcut path = <Company>\<AppName>\
+[Serialoptions]
+Allows = 0
+Number = 1000
+Mask = #####-#####-#####-#####
+[SplashScreen]
+Image = C:\Users\dtmay\Downloads\Defender.jpg
+Sound = 
+Time = 2
+PlaySound = 0
+Allow = 0
+[Build]
+File = C:\Users\dtmay\dillyDefender\target\release\Install_Dilly.exe
+SetupIconPath = ..\icons\ancient.ico
+UninstallIconPath = ..\icons\ancient.ico
+CompressionMethod = 0
+CompressionLevel = 2
+[Updater]
+Allow = 0
+1 = <AppName>
+2 = <AppVersion>
+3 = http://
+4 = http://
+5 = http://
+6 = Update
+Language = 0
+RunProg = 
+RunProgs = 0
+Execdlls = 0
+[Languages]
+2
+[Files/Dirs]
+C:\Users\dtmay\dillyDefender\Defender.ico
+264.1 KB
+ico
+C:\Users\dtmay\dillyDefender\polyglot_cnn_detector_best.h5
+47.8 MB
+h5
+C:\Users\dtmay\dillyDefender\target\release\dilly_defender.exe
+3.3 MB
+exe
+C:\Users\dtmay\dillyDefender\AITraining\TrainingTools\D2\bin\
+N/A
+[Folder]
+[Licence_Begin]
+2657
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil Arial;}{\f1\fnil\fcharset0 Arial;}}
+{\*\generator Riched20 10.0.26100}\viewkind4\uc1 
+\pard\f0\fs20 END USER LICENSE AGREEMENT (EULA)\par
+\par
+PLEASE READ THIS AGREEMENT CAREFULLY BEFORE INSTALLING OR USING DILLY DEFENDER.\par
+\par
+This End User License Agreement (\ldblquote Agreement\rdblquote ) is a legal agreement between you (either an individual or a single entity) and the developers of Dilly Defender (\ldblquote Licensor\rdblquote ).\par
+\par
+By installing, copying, or otherwise using Dilly Defender, you agree to be bound by the terms of this Agreement. If you do not agree to the terms of this Agreement, do not install or use Dilly Defender.\par
+\par
+1. GRANT OF LICENSE\par
+Dilly Defender is licensed, not sold. You are granted a revocable, non-exclusive, non-transferable license to use the software solely for personal or internal business use.\par
+\par
+2. RESTRICTIONS\par
+You may not:\par
+- Reverse engineer, decompile, or disassemble the software.\par
+- Modify, adapt, or create derivative works based on the software.\par
+- Distribute or sublicense the software without prior written consent.\par
+\par
+3. INTELLECTUAL PROPERTY\par
+All rights, title, and interest in and to Dilly Defender remain with the Licensor. The software is protected by copyright and other intellectual property laws.\par
+\par
+4. DISCLAIMER OF WARRANTY\par
+Dilly Defender is provided \ldblquote AS IS\rdblquote  without warranty of any kind. Licensor disclaims all warranties, express or implied, including but not limited to warranties of merchantability and fitness for a particular purpose.\par
+\par
+5. LIMITATION OF LIABILITY\par
+In no event shall the Licensor be liable for any damages (including, without limitation, lost profits or business interruption) arising out of the use or inability to use Dilly Defender, even if the Licensor has been advised of the possibility of such damages.\par
+\par
+6. TERMINATION\par
+This license will terminate automatically if you fail to comply with any of the terms and conditions described herein. Upon termination, you must destroy all copies of the software in your possession.\par
+\par
+7. GOVERNING LAW\par
+This Agreement shall be governed by and construed in accordance with the laws of your jurisdiction, without regard to its conflict of law principles.\par
+\par
+By clicking \ldblquote I Agree\rdblquote  or installing the software, you acknowledge that you have read, understood, and agree to be bound by the terms of this Agreement.\par
+\par
+\f1\'a9 2025 Dilly Defender. All rights reserved.\f0\par
+}
+ [Licence_End]
+[Registry]
+HKEY_LOCAL_MACHINE
+Software\DillyDefender
+InstallPath
+{app}
+0
+HKEY_LOCAL_MACHINE
+Software\DillyDefender
+Version
+1.0.0
+0
+HKEY_LOCAL_MACHINE
+Software\DillyDefender
+Enabled
+1
+0
+[Variables]
+ScanFolder
+HKEY_CLASSES_ROOT
+Software\DillyDefender\Settings
+ScanFolder
+{SCAN_FOLDER}
+[SCs]
+Desktop
+Start
+<InstallPath>\dilly_defender.exe
+
+<InstallPath>\dilly_defender.ico
+0
+[IFP_End]
+[Serials]
+[Serials_End]
+[Commands]
