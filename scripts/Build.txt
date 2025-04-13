@@ -1,0 +1,21 @@
+###Windows 
+sudo apt install mingw-w64
+rustup target add x86_64-pc-windows-msvc
+cargo build --target x86_64-pc-windows-msvc
+
+
+set PATH=%PATH%;C:\path\to\dist\libs
+dilly_defender.exe
+
+powershell.exe -ExecutionPolicy Bypass -File setup_notifications.ps1
+
+###Linux
+rustup target add x86_64-unknown-linux-gnu
+cargo build --target x86_64-pc-windows-msvc
+
+
+export LD_LIBRARY_PATH=./libs:$LD_LIBRARY_PATH
+./bin/dilly_defender
+
+
+

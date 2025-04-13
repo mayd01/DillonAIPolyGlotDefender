@@ -11,3 +11,5 @@ dilly-defender-*/*
 **/build/*
 dillylog.log
 app.log
+**/AITraining/TrainingTools/D2/bin/Detect/_internal/*
+*dist.zip

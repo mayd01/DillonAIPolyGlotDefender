@@ -8,6 +8,9 @@ use logging_lib;
 use std::env;
 use ai_lib::classify_file_with_python;
 
+#[cfg(target_os = "windows")]
+use windows_lib::send_notification;
+
 fn main() 
 {
 
@@ -135,7 +138,13 @@ fn main()
 
             if scanners::headersearch::is_polyglot(file) {
                 println!("{}", "Potential polyglot file detected!".red());
-                log::info!("{}", "Potential polyglot file detected!".red());
+                #[cfg(target_os = "windows")]
+                {
+                    match send_notification("DMZ Defender Scan", &format!("Scan complete! {} {}", "Potential polyglot file detected!", file.as_str())) {
+                        Ok(_) => println!("Notification sent!"),
+                        Err(e) => eprintln!("Error sending notification: {}", e),
+                    }
+                }
             } else {
                 println!("{}", "Scan complete. No threats detected.".blue());
                 log::info!("{}", "Scan complete. No threats detected.".blue());
@@ -153,6 +162,13 @@ fn main()
                 log::info!("Callback invoked with file: {}", file_path);
                 if scanners::headersearch::is_polyglot(&file_path) {
                     log::info!("{}", "Potential polyglot file detected!".red());
+                    #[cfg(target_os = "windows")]
+                    {
+                        match send_notification("Title", "This is a message.") {
+                            Ok(_) => println!("Notification sent!"),
+                            Err(e) => eprintln!("Error sending notification: {}", e),
+                        }
+                    }
                 } else {
                     log::info!("{}", "Scan complete. No threats detected.".blue());
                 }
@@ -232,6 +248,13 @@ fn main()
                 Ok(prediction_score) => {
                     if prediction_score.matches("Polyglot").count() > 0 {
                         println!("{}", "Potential Infection found".red());
+                        #[cfg(target_os = "windows")]
+                        {
+                            match send_notification("Title", "This is a message.") {
+                                Ok(_) => println!("Notification sent!"),
+                                Err(e) => eprintln!("Error sending notification: {}", e),
+                            }
+                        }
                     } else {
                         println!("{}", format!("File is Safe").green());
                     }
