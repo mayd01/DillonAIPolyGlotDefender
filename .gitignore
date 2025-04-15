@@ -13,3 +13,5 @@ dillylog.log
 app.log
 **/AITraining/TrainingTools/D2/bin/Detect/_internal/*
 *dist.zip
+*/bin/*
+AITraining/TrainingTools/D2/bin/Detect/Detect.exe
