@@ -1,6 +1,7 @@
 // notification_lib/src/lib.rs
 
 use notify_rust::Notification;
+#[cfg(target_os = "windows")]
 pub mod password_manager; 
 
 #[cfg(target_os = "windows")]
