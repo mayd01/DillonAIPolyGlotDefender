@@ -1,6 +1,8 @@
 // notification_lib/src/lib.rs
 
 use notify_rust::Notification;
+pub mod password_manager; 
+
 #[cfg(target_os = "windows")]
 pub fn send_notification(title: &str, message: &str) -> Result<(), Box<dyn std::error::Error>> {
     Notification::new()

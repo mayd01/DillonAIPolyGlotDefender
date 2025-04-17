@@ -1,15 +1,19 @@
 use clap::{Arg, Command};
 use colored::*;
-use std::{fs, path::Path};
+use std::{fs, path::{Path, MAIN_SEPARATOR_STR}};
 mod scanners;
 mod scrubber;
 use watcher_lib;
 use logging_lib;
 use std::env;
 use ai_lib::classify_file_with_python;
+mod quarantine; 
 
 #[cfg(target_os = "windows")]
-use windows_lib::send_notification;
+use windows_lib::{send_notification, password_manager};
+
+#[cfg(target_os = "windows")]
+use quarantine::storage::QuarantineManager;
 
 fn main() 
 {
@@ -20,8 +24,10 @@ fn main()
         eprintln!("Failed to initialize logger: {}", e);
         return;
     }
-   
-   
+
+    #[cfg(target_os = "windows")]
+    let manager = initialize_manager();
+
     let matches = Command::new("Dilly Defender")
         .version("1.0")
         .author("Dillon May")
@@ -140,6 +146,11 @@ fn main()
                 println!("{}", "Potential polyglot file detected!".red());
                 #[cfg(target_os = "windows")]
                 {
+                    manager.quarantine_file(Path::new(file)).unwrap_or_else(|_| {
+                        println!("Failed to quarantine the file.");
+                        std::process::exit(1);
+                    });
+                    
                     match send_notification("DMZ Defender Scan", &format!("Scan complete! {} {}", "Potential polyglot file detected!", file.as_str())) {
                         Ok(_) => println!("Notification sent!"),
                         Err(e) => eprintln!("Error sending notification: {}", e),
@@ -304,4 +315,33 @@ fn main()
             println!("{}", "Use --help to see available commands.".yellow());
         }
     }
+}
+
+#[cfg(target_os = "windows")]
+fn initialize_manager() -> QuarantineManager {
+    use std::fs;
+    use std::path::Path;
+
+    let quarantine_dir = Path::new("C:\\ProgramData\\DillyDefender\\Quarantine").to_path_buf();
+    fs::create_dir_all(&quarantine_dir).unwrap();
+    let target_name = "dilly_defender_service"; 
+
+    let password = match windows_lib::password_manager::retrieve_password_from_credential_manager(target_name) {
+        Some(password) => {
+            password
+        },
+        None => {
+            let password = windows_lib::password_manager::generate_random_password(16);
+            println!("No password found, generated a random one: {}", password);
+
+            if !windows_lib::password_manager::store_password_in_credential_manager(&password, target_name) {
+                println!("Failed to store password in credential manager.");
+                std::process::exit(1);
+            }
+
+            password
+        }
+    };
+
+    QuarantineManager::new(quarantine_dir, password)
 }
