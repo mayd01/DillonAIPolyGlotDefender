@@ -1,7 +1,7 @@
 import os
 import requests
 
-GITHUB_TOKEN = "REMOVEDydOkFdxaLqEsU7bEq4gQvKhkEoBm5Q0M0ePT"
+GITHUB_TOKEN = ""
 HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"}
 
 def get_github_files(extension, max_results=5000):
