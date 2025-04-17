@@ -11,9 +11,7 @@ pub fn classify_file_with_python(file_path: &str) -> Result<String, io::Error> {
         .to_path_buf();
     
     let script: std::path::PathBuf = exe_dir.join("Detect.py");
-    
-    let command = format!("python {} -F {}", script.display(), file_path);
-     print!("***{}", command);
+     
     
     let output = Command::new("./bin/Detect/Detect.exe")
         .arg("-F")

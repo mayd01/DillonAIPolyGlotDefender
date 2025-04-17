@@ -4,7 +4,8 @@ members = [
     "libs/watcher_lib",
     "libs/logging_lib", 
     "libs/ai_lib",
-    "libs/windows_lib"
+    "libs/windows_lib",
+    "GUI"
 ]
 
 resolver = "2"
