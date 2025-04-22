@@ -5,6 +5,7 @@ struct DillyDefenderApp {
     qm: QuarantineManager,
     files: Vec<PathBuf>,
 }
+
 impl eframe::App for DillyDefenderApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -16,7 +17,13 @@ impl eframe::App for DillyDefenderApp {
                 ui.horizontal(|ui| {
                     ui.label(file.display().to_string());
                     if ui.button("Restore").clicked() {
-                        let _ = self.qm.restore_file(file, &PathBuf::from("C:/Restored/"));
+                        #[cfg(target_os = "windows")]
+                        {
+                            if let Ok(original_path) = self.qm.get_original_path(file) {
+                                let _ = self.qm.restore_file(file, &original_path);
+                            }
+                        }
+                        
                     }
                 });
             }
@@ -30,6 +37,8 @@ fn main() -> eframe::Result<()> {
         "supersecurepassword".to_string(),
     );
     let files = qm.list_quarantined_files();
+
+    
     let app = DillyDefenderApp { qm, files };
     let options = eframe::NativeOptions::default();
     

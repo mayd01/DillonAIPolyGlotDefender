@@ -15,6 +15,12 @@ zip = "0.6"
 time = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0.138"
+tempfile = "3"
+aes = "0.7"
+block-modes = { version = "0.8", features = ["std"] }
+block-padding = "0.3"
+rand = "0.9.1"
+hex = "0.4"
 
 watcher_lib = { path = "../libs/watcher_lib" }
 logging_lib = { path = "../libs/logging_lib" }
