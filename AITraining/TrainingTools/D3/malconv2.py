@@ -41,9 +41,9 @@ def read_file_bytes(file_path, max_size=1000000):
         if len(file_bytes) < max_size:
             file_bytes = file_bytes + b'\0' * (max_size - len(file_bytes))  
         return file_bytes  # Return raw byte data
-class MalConv2:
+class D22:
     def __init__(self, model=None):
-        """Initialize the MalConv2 model."""
+        """Initialize the D22 model."""
         if model is None:
             self.model = create_model()
         else:

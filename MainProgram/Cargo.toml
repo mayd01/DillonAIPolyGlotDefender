@@ -21,6 +21,8 @@ block-modes = { version = "0.8", features = ["std"] }
 block-padding = "0.3"
 rand = "0.9.1"
 hex = "0.4"
+reqwest = { version = "0.12.15", features = ["blocking", "rustls-tls"] }
+tokio = { version = "1", features = ["full"] }
 
 watcher_lib = { path = "../libs/watcher_lib" }
 logging_lib = { path = "../libs/logging_lib" }

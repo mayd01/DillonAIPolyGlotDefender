@@ -1,6 +1,6 @@
 use clap::{Arg, Command};
 use colored::*;
-use std::{fs, path::{Path, MAIN_SEPARATOR_STR}};
+use std::{fs::{self, File}, path::{Path, PathBuf, MAIN_SEPARATOR_STR}};
 mod scanners;
 mod scrubber;
 use watcher_lib;
@@ -8,12 +8,26 @@ use logging_lib;
 use std::env;
 use ai_lib::classify_file_with_python;
 mod quarantine; 
+use reqwest::blocking::get;
+use std::io::Write;
+use std::error::Error;
+use std::process::Command as ProcessCommand;
+
+use reqwest::blocking::Client;
+use reqwest::header::USER_AGENT;
 
 #[cfg(target_os = "windows")]
 use windows_lib::{send_notification, password_manager};
 
 #[cfg(target_os = "windows")]
 use quarantine::storage::QuarantineManager;
+
+const CLAMAV_DB_URLS: &[&str] = &[
+    "https://database.clamav.net/main.cvd",
+    "https://database.clamav.net/daily.cvd",
+    "https://database.clamav.net/bytecode.cvd",
+];
+
 
 fn main() 
 {
@@ -24,6 +38,12 @@ fn main()
         eprintln!("Failed to initialize logger: {}", e);
         return;
     }
+
+    #[cfg(target_os = "windows")]
+    let clamav_dir = r"C:\Program Files\DillyDefender\clamav";
+
+    #[cfg(target_os = "linux")]
+    let clamav_dir = r"./clamav";
 
     #[cfg(target_os = "windows")]
     let manager = initialize_manager();
@@ -122,8 +142,44 @@ fn main()
                 std::process::exit(1);
             }
 
+            if !Path::new(clamav_dir).exists() {
+                eprintln!("ClamAV directory not found: {}", clamav_dir);
+                std::process::exit(1);
+            }
+
             println!("{}", format!("Scanning file: {}", file).green());
             log::info!("Scanning file: {}", file);
+
+            match scan_file(file, clamav_dir) {
+                Ok(result) => {
+                    if result == "continue" {
+                        println!("ClamAV passed will continue with DMZ");
+                    } 
+                    else 
+                    {
+                        log::info!("Virus found in the file! We are taking action.");
+                        #[cfg(target_os = "windows")]
+                        {
+                            match send_notification("DMZ Defender Scan", &format!("Scan Found A potential threat! {}", file.as_str())) {
+                                Ok(_) => println!("Notification sent!"),
+                                Err(e) => eprintln!("Error sending notification: {}", e),
+                            }
+                           manager.quarantine_file(Path::new(file)).unwrap_or_else(|err| {
+                                println!("Failed to quarantine the file. {}" , err);
+                                log::error!("Failed to quarantine the file.");
+                                std::process::exit(1);
+                            });
+                            println!("File quarantined successfully.");
+                            log::info!("File quarantined successfully.");
+                            std::process::exit(0);
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error scanning file: {}", e);
+                    std::process::exit(1);
+                }
+            }
 
             if verbose {
                 println!("{}", "Verbose mode enabled. Performing deep scan...".yellow());
@@ -143,17 +199,50 @@ fn main()
             }
 
             if scanners::headersearch::is_polyglot(file) {
-                println!("{}", "Potential polyglot file detected!".red());
+                println!("{}", "Potential Infected file detected!, Running our AI-Scan".red());
                 #[cfg(target_os = "windows")]
                 {
-                    manager.quarantine_file(Path::new(file)).unwrap_or_else(|_| {
-                        println!("Failed to quarantine the file.");
+                    #[cfg(target_os = "windows")]
+                    {
+                        match send_notification("DMZ Defender Scan", &format!("Scan Found A potential threat!  Running AI Scan{}", file.as_str())) {
+                            Ok(_) => println!("Notification sent!"),
+                            Err(e) => eprintln!("Error sending notification: {}", e),
+                        }
+                    }
+                    let absolute_path = fs::canonicalize(file.clone())
+                                        .unwrap_or_else(|_| Path::new(&file).to_path_buf());
+
+                    if !Path::new(&absolute_path).exists() {
+                        println!("{}", "Error: File not found.".red());
+                        log::error!("Error: File not found.");
                         std::process::exit(1);
-                    });
-                    
-                    match send_notification("DMZ Defender Scan", &format!("Scan complete! {} {}", "Potential polyglot file detected!", file.as_str())) {
-                        Ok(_) => println!("Notification sent!"),
-                        Err(e) => eprintln!("Error sending notification: {}", e),
+                    }
+                    println!("{}", format!("AI scanning initiated for: {}", absolute_path.to_str().unwrap()).blue());
+                    match classify_file_with_python(absolute_path.to_str().unwrap()) {
+                        Ok(prediction_score) => {
+                            if prediction_score.matches("Polyglot").count() > 0 {
+                                println!("{}", "Potential Infection found".red());
+                                #[cfg(target_os = "windows")]
+                                {
+                                    match send_notification("DMZ Defender Scan", &format!("Scan complete! {} {}", "Potential polyglot file detected!", file.as_str())) {
+                                        Ok(_) => println!("Notification sent!"),
+                                        Err(e) => eprintln!("Error sending notification: {}", e),
+                                    }
+                                    let quarantined_path = manager.quarantine_file(Path::new(file)).unwrap_or_else(|_| {
+                                        println!("Failed to quarantine the file.");
+                                        log::error!("Failed to quarantine the file.");
+                                        PathBuf::from(file) 
+                                    });
+                                    println!("File quarantined at: {}", quarantined_path.display());
+                                    log::info!("File quarantined at: {}", quarantined_path.display());
+                                }
+                            } else {
+                                println!("{}", format!("File is Safe").green());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error running Python script for Model: {}", e);
+                        }
                     }
                 }
             } else {
@@ -172,12 +261,33 @@ fn main()
             let callback = |file_path: String| {
                 log::info!("Callback invoked with file: {}", file_path);
                 if scanners::headersearch::is_polyglot(&file_path) {
-                    log::info!("{}", "Potential polyglot file detected!".red());
-                    #[cfg(target_os = "windows")]
-                    {
-                        match send_notification("Title", "This is a message.") {
-                            Ok(_) => println!("Notification sent!"),
-                            Err(e) => eprintln!("Error sending notification: {}", e),
+                    log::info!("{}", "Potential polyglot file detected! Running AI scan".red());
+                    let absolute_path = fs::canonicalize(file_path.clone())
+                                        .unwrap_or_else(|_| Path::new(&file_path).to_path_buf());
+
+                    if !Path::new(&absolute_path).exists() {
+                        println!("{}", "Error: File not found.".red());
+                        log::error!("Error: File not found.");
+                        std::process::exit(1);
+                    }
+                    println!("{}", format!("AI scanning initiated for: {}", absolute_path.to_str().unwrap()).blue());
+                    match classify_file_with_python(absolute_path.to_str().unwrap()) {
+                        Ok(prediction_score) => {
+                            if prediction_score.matches("Polyglot").count() > 0 {
+                                println!("{}", "Potential Infection found".red());
+                                #[cfg(target_os = "windows")]
+                                {
+                                    match send_notification("We found a File that looks Infected", "we are taking action.") {
+                                        Ok(_) => println!("Notification sent!"),
+                                        Err(e) => eprintln!("Error sending notification: {}", e),
+                                    }
+                                }
+                            } else {
+                                println!("{}", format!("File is Safe").green());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error running Python script for Model: {}", e);
                         }
                     }
                 } else {
@@ -261,7 +371,7 @@ fn main()
                         println!("{}", "Potential Infection found".red());
                         #[cfg(target_os = "windows")]
                         {
-                            match send_notification("Title", "This is a message.") {
+                            match send_notification("We found a File that looks Infected", "we are taking action.") {
                                 Ok(_) => println!("Notification sent!"),
                                 Err(e) => eprintln!("Error sending notification: {}", e),
                             }
@@ -309,6 +419,9 @@ fn main()
         Some(("update", _)) => {
             println!("{}", "Checking for updates...".yellow());
             println!("{}", "You are running the latest version.".green());
+            update_clamav_db(clamav_dir);
+            println!("{}", "ClamAV database updated successfully.".green());
+            
         }
 
         _ => {
@@ -323,7 +436,10 @@ fn initialize_manager() -> QuarantineManager {
     use std::path::Path;
 
     let quarantine_dir = Path::new("C:\\ProgramData\\DillyDefender\\Quarantine").to_path_buf();
-    fs::create_dir_all(&quarantine_dir).unwrap();
+    if let Err(e) = fs::create_dir_all(&quarantine_dir) {
+        eprintln!("Failed to create quarantine directory: {}", e);
+        std::process::exit(1);
+    }
     let target_name = "dilly_defender_service"; 
 
     let password = match windows_lib::password_manager::retrieve_password_from_credential_manager(target_name) {
@@ -344,4 +460,50 @@ fn initialize_manager() -> QuarantineManager {
     };
 
     QuarantineManager::new(quarantine_dir, password)
+}
+
+fn update_clamav_db(db_dir: &str) {
+    println!("{}", "Updating ClamAV database...".yellow());
+    let clam_command = "C:\\Program Files\\DillyDefender\\clamav\\freshclam.exe";
+    let status = ProcessCommand::new(clam_command)
+        .arg("--datadir")
+        .arg(db_dir)
+        .status()
+        .expect("Failed to run freshclam");
+
+    if status.success() {
+        println!("ClamAV database updated successfully.");
+    } else {
+        eprintln!("freshclam failed with exit code: {:?}", status.code());
+    }
+}
+
+
+
+pub fn scan_file(file_path: &str, clamav_dir: &str) -> Result<&'static str, Box<dyn Error>> {
+    let resolved_path = fs::canonicalize(file_path)?;
+    println!("[DEBUG] Scanning file: {:?}", resolved_path);
+    println!("[DEBUG] Using ClamAV binary at: {}/clamscan", clamav_dir);
+    println!("[DEBUG] Using ClamAV database dir: {}", clamav_dir);
+
+    let output = ProcessCommand::new(format!("{}/clamscan", clamav_dir))
+        .arg("--database")
+        .arg(clamav_dir)
+        .arg(&resolved_path)
+        .output()?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    println!("[DEBUG] ClamAV stdout:\n{}", stdout);
+    println!("[DEBUG] ClamAV stderr:\n{}", stderr);
+    println!("[DEBUG] Exit status: {}", output.status);
+
+    if stdout.contains("OK") {
+        Ok("continue")
+    } else if stdout.contains("FOUND") {
+        Ok("stop")
+    } else {
+        Ok("continue")
+    }
 }

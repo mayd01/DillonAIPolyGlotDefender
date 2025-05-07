@@ -1,12 +1,12 @@
 import numpy as np
 from tensorflow import keras
-from malconv2 import MalConv2, read_file_bytes  
+from D22 import D22, read_file_bytes  
 
 def predict_file(file_path):
     # Load model
-    print(f"Loading model from ./models/malconv2_model.h5")
-    model = keras.models.load_model("./models/malconv2_model.h5")
-    print(f"Model loaded from ./models/malconv2_model.h5")
+    print(f"Loading model from ./models/D22_model.h5")
+    model = keras.models.load_model("./models/D22_model.h5")
+    print(f"Model loaded from ./models/D22_model.h5")
     
     # Read file bytes
     file_bytes = read_file_bytes(file_path, max_size=1000000)

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
-from malconv2 import MalConv2, create_model
+from D22 import D22, create_model
 from process_data import preprocess_and_save_data  # Import the preprocessing function
 
 # Use memory mapping to load large numpy files efficiently
@@ -61,16 +61,16 @@ except Exception as e:
     print(f"Error during train-test split: {e}")
 
 # Initialize and train the model
-malconv2_model = MalConv2()
+D22_model = D22()
 try:
-    print("Training MalConv2 model...")
-    malconv2_model.train(X_train, y_train, X_test, y_test, epochs=10, batch_size=32)
+    print("Training D22 model...")
+    D22_model.train(X_train, y_train, X_test, y_test, epochs=10, batch_size=32)
 except Exception as e:
     print(f"Error during training: {e}")
 
 # Save the model
 try:
-    malconv2_model.save("./models/malconv2_model.h5")
+    D22_model.save("./models/D22_model.h5")
     print("Model saved successfully!")
 except Exception as e:
     print(f"Error saving the model: {e}")

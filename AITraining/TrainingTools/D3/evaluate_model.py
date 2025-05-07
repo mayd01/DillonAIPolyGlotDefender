@@ -1,8 +1,8 @@
 import numpy as np
 from tensorflow import keras
-from malconv2 import MalConv2  # Replace with actual model code
+from D22 import D22  # Replace with actual model code
 
-model = keras.models.load_model("./models/malconv2_model.h5")
+model = keras.models.load_model("./models/D22_model.h5")
 
 X_test, y_test = load_dataset("./data/test_data", max_size=1000000)
 

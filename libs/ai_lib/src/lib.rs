@@ -12,13 +12,21 @@ pub fn classify_file_with_python(file_path: &str) -> Result<String, io::Error> {
     
     let script: std::path::PathBuf = exe_dir.join("Detect.py");
      
-    
+    #[cfg(target_os = "linux")]
     let output = Command::new("./bin/Detect/Detect.exe")
         .arg("-F")
         .arg(file_path) 
         .stdout(Stdio::piped()) 
         .stderr(Stdio::piped()) 
         .output()?; 
+
+    #[cfg(target_os = "windows")]
+    let output = Command::new(r"C:\Program Files\DillyDefender\bin\Detect\Detect.exe")
+    .arg("-F")
+    .arg(file_path) 
+    .stdout(Stdio::piped()) 
+    .stderr(Stdio::piped()) 
+    .output()?;
 
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
