@@ -13,7 +13,7 @@ pub fn classify_file_with_python(file_path: &str) -> Result<String, io::Error> {
     let script: std::path::PathBuf = exe_dir.join("Detect.py");
      
     #[cfg(target_os = "linux")]
-    let output = Command::new("./bin/Detect/Detect.exe")
+    let output = Command::new("/opt/DillyDefender/bin/Detect/Detect")
         .arg("-F")
         .arg(file_path) 
         .stdout(Stdio::piped()) 

@@ -96,3 +96,5 @@ bash
 Copy
 Edit
 sudo rpm -i ~/rpmbuild/RPMS/x86_64/dilly_defender-1.0-1.x86_64.rpm
+
+cargo build --release --target x86_64-unknown-linux-musl

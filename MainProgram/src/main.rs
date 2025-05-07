@@ -43,7 +43,7 @@ fn main()
     let clamav_dir = r"C:\Program Files\DillyDefender\clamav";
 
     #[cfg(target_os = "linux")]
-    let clamav_dir = r"./clamav";
+    let clamav_dir = r"/opt/DillyDefender/clamav";
 
     #[cfg(target_os = "windows")]
     let manager = initialize_manager();
@@ -494,10 +494,6 @@ pub fn scan_file(file_path: &str, clamav_dir: &str) -> Result<&'static str, Box<
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-
-    println!("[DEBUG] ClamAV stdout:\n{}", stdout);
-    println!("[DEBUG] ClamAV stderr:\n{}", stderr);
-    println!("[DEBUG] Exit status: {}", output.status);
 
     if stdout.contains("OK") {
         Ok("continue")
