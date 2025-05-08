@@ -7,18 +7,17 @@ RPMBUILD_DIR=~/rpmbuild
 SRC_DIR=$RPMBUILD_DIR/SOURCES
 SPEC_DIR=$RPMBUILD_DIR/SPECS
 BUILD_DIR=$APP_NAME-$VERSION
-BIN_PATH="target/x86_64-unknown-linux-musl/release/"
+BIN_PATH="target/x86_64-unknown-linux-gnu/release/"
 LIBS_PATH="target/release/deps"
 CLAMAV_RPM="clamav-1.4.2.linux.x86_64.rpm"
 CLAMAV_DEB="clamav-1.4.2.linux.x86_64.deb"
-CLAMAV_URL_RPM="https://www.clamav.net/downloads/clamav-1.4.2.linux.x86_64.rpm"
-CLAMAV_URL_DEB="https://www.clamav.net/downloads/clamav-1.4.2.linux.x86_64.deb"
+CLAMAV_URL_RPM="https://www.clamav.net/downloads/production/clamav-1.4.2.linux.x86_64.rpm"
+CLAMAV_URL_DEB="https://www.clamav.net/downloads/production/clamav-1.4.2.linux.x86_64.deb"
 
 # Create necessary directories
 mkdir -p $SRC_DIR $SPEC_DIR
 
 # Build the project using cargo
-cargo build --release --target x86_64-unknown-linux-musl || { echo "Rust build failed"; exit 1; }
 
 # Clean up previous build and create the new build directory structure
 rm -rf $BUILD_DIR
@@ -57,14 +56,14 @@ $APP_NAME is a Rust-based application designed for PolyGlot File Detection.
 %install
 # Install the executable under /opt/DillyDefender/bin
 mkdir -p %{buildroot}/opt/DillyDefender/bin
-install -m 755 $BUILD_DIR/bin/* %{buildroot}/opt/DillyDefender/bin/
+install -m 755 $BUILD_DIR/bin/* %{buildroot}/opt/DillyDefender/
 
 # Install the libraries under /opt/DillyDefender/libs
 mkdir -p %{buildroot}/opt/DillyDefender/libs
 install -m 755 $BUILD_DIR/libs/* %{buildroot}/opt/DillyDefender/libs/
 
 %files
-/opt/DillyDefender/bin/*  
+/opt/DillyDefender/*  
 /opt/DillyDefender/libs/*
 
 %changelog
